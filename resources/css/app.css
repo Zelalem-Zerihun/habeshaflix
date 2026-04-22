@@ -1,11 +1,298 @@
-@import 'tailwindcss';
+:root {
+    --bg: #0b0b0b;
+    --panel: #141414;
+    --text: #f5f5f5;
+    --muted: #b3b3b3;
+    --danger: #e50914;
+}
 
-@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
-@source '../../storage/framework/views/*.php';
-@source '../**/*.blade.php';
-@source '../**/*.js';
+* {
+    box-sizing: border-box;
+}
 
-@theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+body.nf-body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: Inter, Arial, sans-serif;
+    background: radial-gradient(circle at top, #202020 0%, var(--bg) 45%);
+    color: var(--text);
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+.nf-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1.25rem 3rem;
+}
+
+.nf-header-landing {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.nf-logo {
+    color: var(--danger);
+    font-weight: 800;
+    letter-spacing: 0.08rem;
+    font-size: 1.8rem;
+}
+
+.nf-nav {
+    display: flex;
+    gap: 1.2rem;
+    font-size: 0.95rem;
+}
+
+.nf-nav a {
+    color: #d4d4d4;
+}
+
+.nf-nav a.active {
+    color: #fff;
+    font-weight: 600;
+}
+
+.nf-btn {
+    border: 0;
+    border-radius: 4px;
+    padding: 0.65rem 1rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.nf-small-btn {
+    font-size: 0.85rem;
+}
+
+.nf-btn-danger {
+    background: var(--danger);
+    color: #fff;
+}
+
+.nf-btn-muted {
+    background: rgba(109, 109, 110, 0.7);
+    color: #fff;
+}
+
+.nf-btn-light {
+    background: #fff;
+    color: #111;
+}
+
+.nf-hero-center {
+    max-width: 700px;
+    margin: 12vh auto 0;
+    text-align: center;
+    padding: 1rem;
+}
+
+.nf-hero-center h1 {
+    font-size: clamp(2rem, 6vw, 4rem);
+    margin: 0 0 0.75rem;
+}
+
+.nf-hero-center p {
+    color: var(--muted);
+    font-size: 1.15rem;
+}
+
+.nf-actions {
+    display: flex;
+    justify-content: center;
+    gap: 0.8rem;
+    flex-wrap: wrap;
+    margin-top: 1.5rem;
+}
+
+.nf-profiles {
+    max-width: 1000px;
+    margin: 3rem auto;
+    text-align: center;
+    padding: 0 1rem;
+}
+
+.nf-profile-grid {
+    margin: 2.5rem 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 1.2rem;
+}
+
+.nf-profile img {
+    width: 100%;
+    border-radius: 0.35rem;
+    border: 2px solid transparent;
+}
+
+.nf-profile:hover img {
+    border-color: #fff;
+}
+
+.nf-profile span {
+    color: #c0c0c0;
+    margin-top: 0.5rem;
+    display: block;
+}
+
+.nf-hero {
+    min-height: 60vh;
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    align-items: flex-end;
+    padding: 3rem;
+}
+
+.nf-hero-content {
+    max-width: 680px;
+}
+
+.nf-kicker {
+    color: #d4d4d4;
+    text-transform: uppercase;
+    letter-spacing: 0.08rem;
+    font-size: 0.8rem;
+}
+
+.nf-hero h1 {
+    margin: 0.3rem 0;
+    font-size: clamp(2rem, 5vw, 4rem);
+}
+
+.nf-hero p {
+    color: #ececec;
+    line-height: 1.5;
+}
+
+.nf-content {
+    margin-top: -3rem;
+    padding: 0 3rem 3rem;
+}
+
+.nf-row {
+    margin-top: 2rem;
+}
+
+.nf-row-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.nf-row-header h2 {
+    margin: 0;
+}
+
+.nf-row-header a {
+    color: #d1d5db;
+    font-size: 0.9rem;
+}
+
+.nf-card-grid {
+    margin-top: 0.9rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 0.9rem;
+}
+
+.nf-card {
+    background: var(--panel);
+    border-radius: 0.45rem;
+    overflow: hidden;
+    border: 1px solid #222;
+}
+
+.nf-card img {
+    width: 100%;
+    display: block;
+}
+
+.nf-card-body {
+    padding: 0.7rem;
+}
+
+.nf-card-body h3 {
+    margin: 0 0 0.6rem;
+    font-size: 0.95rem;
+}
+
+.nf-link-btn {
+    display: inline-block;
+    padding: 0.35rem 0.6rem;
+    border-radius: 0.3rem;
+    background: #272727;
+    font-size: 0.85rem;
+}
+
+.nf-watch {
+    max-width: 980px;
+    margin: 2rem auto;
+    padding: 1rem;
+}
+
+.nf-watch img {
+    width: 100%;
+    border-radius: 0.6rem;
+    border: 1px solid #2a2a2a;
+}
+
+.nf-signin {
+    min-height: calc(100vh - 100px);
+    display: grid;
+    place-items: center;
+    padding: 1rem;
+}
+
+.nf-form {
+    width: min(420px, 100%);
+    background: rgba(0, 0, 0, 0.75);
+    border-radius: 0.5rem;
+    padding: 2rem;
+}
+
+.nf-form h1 {
+    margin-top: 0;
+}
+
+.nf-form label {
+    display: block;
+    margin-bottom: 1rem;
+}
+
+.nf-form span {
+    display: block;
+    margin-bottom: 0.4rem;
+    color: var(--muted);
+}
+
+.nf-form input {
+    width: 100%;
+    border: 1px solid #333;
+    background: #111;
+    color: #fff;
+    border-radius: 0.35rem;
+    padding: 0.75rem;
+}
+
+.nf-form p {
+    color: var(--muted);
+    margin-top: 1.2rem;
+}
+
+@media (max-width: 900px) {
+    .nf-header,
+    .nf-content,
+    .nf-hero {
+        padding-inline: 1rem;
+    }
+
+    .nf-header {
+        flex-wrap: wrap;
+    }
 }
