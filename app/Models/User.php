@@ -51,4 +51,9 @@ class User extends Authenticatable
     {
         return $this->hasManyThrough(Movie::class, Watchlist::class, 'user_id', 'id', 'id', 'movie_id');
     }
+
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin';
+    }
 }

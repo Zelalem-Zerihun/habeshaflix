@@ -23,7 +23,7 @@ class Movie extends Model
         return $this->belongsToMany(Genre::class, 'movie_genre');
     }
 
-    public function casts(): BelongsToMany
+    public function castMembers(): BelongsToMany
     {
         return $this->belongsToMany(Cast::class, 'movie_cast');
     }
