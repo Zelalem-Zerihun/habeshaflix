@@ -33,6 +33,8 @@ Route::get('/movies/{movie}', [MovieController::class, 'show'])->name('movies.sh
 Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/admin', [AdminController::class, 'index'])->name('admin.dashboard');
     Route::get('/admin/movies', [AdminController::class, 'movies'])->name('admin.movies.index');
+    Route::get('/admin/movies/{movie}/edit', [AdminController::class, 'editMovie'])->name('admin.movies.edit');
+    Route::put('/admin/movies/{movie}', [AdminController::class, 'updateMovie'])->name('admin.movies.update');
     Route::delete('/admin/movies/{movie}', [AdminController::class, 'deleteMovie'])->name('admin.movies.destroy');
     Route::patch('/admin/movies/{movie}/approve', [AdminController::class, 'approveMovie'])->name('admin.movies.approve');
     Route::patch('/admin/movies/{movie}/reject', [AdminController::class, 'rejectMovie'])->name('admin.movies.reject');

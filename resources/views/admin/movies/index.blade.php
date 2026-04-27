@@ -40,7 +40,9 @@
                         <tr style="border-bottom: 1px solid #333;">
                             <td style="padding: 1rem;">
                                 <div style="display: flex; align-items: center; gap: 1rem;">
-                                    <img src="https://img.youtube.com/vi/{{ $movie->youtube_id }}/default.jpg" style="height: 40px; border-radius: 4px;">
+                                    <div style="width: 80px; flex-shrink: 0;">
+                                        <img src="https://img.youtube.com/vi/{{ $movie->youtube_id }}/mqdefault.jpg" style="width: 100%; aspect-ratio: 16/9; object-fit: cover; border-radius: 4px; display: block;">
+                                    </div>
                                     <div>
                                         <div style="font-weight: bold;">{{ $movie->title }}</div>
                                         <div style="font-size: 0.8rem; color: #b3b3b3;">{{ $movie->year ?? 'N/A' }}</div>
@@ -57,7 +59,8 @@
                             </td>
                             <td style="padding: 1rem; color: #b3b3b3; font-size: 0.9rem;">{{ $movie->created_at->format('M d, Y') }}</td>
                             <td style="padding: 1rem; text-align: right;">
-                                <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
+                                <div style="display: flex; gap: 0.5rem; justify-content: flex-end; align-items: center;">
+                                    <a href="{{ route('admin.movies.edit', $movie) }}" class="nf-btn nf-small-btn" style="background: #333; color: #fff; padding: 0.4rem 0.8rem; text-decoration: none;">Edit</a>
                                     @if($movie->status !== 'approved')
                                         <form action="{{ route('admin.movies.approve', $movie) }}" method="POST">
                                             @csrf

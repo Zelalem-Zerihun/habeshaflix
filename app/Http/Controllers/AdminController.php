@@ -41,6 +41,60 @@ class AdminController extends Controller
         return view('admin.movies.index', compact('movies'));
     }
 
+    public function editMovie(Movie $movie): View
+    {
+        $genres = Genre::all();
+        $casts = Cast::all();
+        $movie->load(['genres', 'castMembers']);
+        
+        return view('admin.movies.edit', compact('movie', 'genres', 'casts'));
+    }
+
+    public function updateMovie(Request $request, Movie $movie): RedirectResponse
+    {
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'youtube_url' => 'required|url',
+            'description' => 'nullable|string',
+            'year' => 'nullable|integer|min:1900|max:' . (date('Y') + 5),
+            'status' => 'required|in:pending,approved,rejected',
+            'genres' => 'nullable|array',
+            'genres.*' => 'exists:genres,id',
+            'casts' => 'nullable|array',
+            'casts.*' => 'exists:casts,id',
+        ]);
+
+        $youtubeId = $this->extractYoutubeId($validated['youtube_url']);
+
+        if (! $youtubeId) {
+            return back()->withErrors(['youtube_url' => 'Could not extract a valid YouTube Video ID.'])->withInput();
+        }
+
+        $movie->update([
+            'title' => $validated['title'],
+            'youtube_id' => $youtubeId,
+            'description' => $validated['description'],
+            'year' => $validated['year'],
+            'status' => $validated['status'],
+        ]);
+
+        $movie->genres()->sync($validated['genres'] ?? []);
+        $movie->castMembers()->sync($validated['casts'] ?? []);
+
+        return redirect()->route('admin.movies.index')->with('status', 'Movie updated successfully.');
+    }
+
+    private function extractYoutubeId(string $url): ?string
+    {
+        $pattern = '/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/ ]{11})/i';
+
+        if (preg_match($pattern, $url, $matches)) {
+            return $matches[1];
+        }
+
+        return null;
+    }
+
     public function deleteMovie(Movie $movie): RedirectResponse
     {
         $movie->delete();
