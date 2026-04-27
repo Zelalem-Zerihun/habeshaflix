@@ -26,6 +26,7 @@
             font-family: "Segoe UI", Inter, Arial, sans-serif;
             background: radial-gradient(circle at top, #222 0%, var(--bg) 45%);
             color: var(--text);
+            padding-top: 80px; /* Space for fixed header */
         }
 
         a {
@@ -34,23 +35,30 @@
         }
 
         .nf-header {
-            position: sticky;
+            position: fixed;
             top: 0;
-            z-index: 20;
+            left: 0;
+            width: 100%;
+            z-index: 100;
             display: flex;
             align-items: center;
             justify-content: space-between;
             gap: 1rem;
-            padding: 1.1rem 3rem;
-            backdrop-filter: blur(6px);
-            background: linear-gradient(to bottom, rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0));
+            padding: 1rem 3rem;
+            backdrop-filter: blur(12px);
+            background: linear-gradient(to bottom, rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0.5));
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .nf-header-landing {
-            position: static;
+            position: absolute;
             max-width: 1200px;
             margin: 0 auto;
             background: transparent;
+            border-bottom: none;
+            backdrop-filter: none;
+            left: 50%;
+            transform: translateX(-50%);
         }
 
         .nf-logo {
@@ -201,7 +209,6 @@
         }
 
         .nf-content {
-            margin-top: -2.5rem;
             padding: 0 3rem 3rem;
         }
 

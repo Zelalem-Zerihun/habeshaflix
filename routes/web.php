@@ -6,8 +6,7 @@ use App\Http\Controllers\NetflixController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', [MovieController::class, 'index'])->name('home');
-Route::get('/movies/{movie}', [MovieController::class, 'show'])->name('movies.show');
+Route::get('/', [NetflixController::class, 'browse'])->name('home');
 
 Route::get('/landing', [NetflixController::class, 'landing'])->name('landing');
 Route::get('/profiles', [NetflixController::class, 'profiles'])->name('profiles');
@@ -16,18 +15,34 @@ Route::get('/movies', [NetflixController::class, 'movies'])->name('movies');
 Route::get('/series', [NetflixController::class, 'series'])->name('series');
 Route::get('/new-and-popular', [NetflixController::class, 'newPopular'])->name('new-popular');
 Route::get('/my-list', [NetflixController::class, 'myList'])->name('my-list');
-Route::get('/watch/{slug?}', [NetflixController::class, 'watch'])->name('watch');
+Route::get('/watch/{movie}', [NetflixController::class, 'watch'])->name('watch');
 
 Route::middleware('auth')->group(function () {
     Route::view('/dashboard', 'dashboard')->name('dashboard');
+
+    Route::get('/movies/create', [MovieController::class, 'create'])->name('movies.create');
+    Route::post('/movies', [MovieController::class, 'store'])->name('movies.store');
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
+Route::get('/movies/{movie}', [MovieController::class, 'show'])->name('movies.show');
+
 Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/admin', [AdminController::class, 'index'])->name('admin.dashboard');
+    Route::get('/admin/movies', [AdminController::class, 'movies'])->name('admin.movies.index');
+    Route::delete('/admin/movies/{movie}', [AdminController::class, 'deleteMovie'])->name('admin.movies.destroy');
+    Route::patch('/admin/movies/{movie}/approve', [AdminController::class, 'approveMovie'])->name('admin.movies.approve');
+    Route::patch('/admin/movies/{movie}/reject', [AdminController::class, 'rejectMovie'])->name('admin.movies.reject');
+    
+    // Casts
+    Route::get('/admin/casts', [AdminController::class, 'casts'])->name('admin.casts.index');
+    Route::post('/admin/casts', [AdminController::class, 'storeCast'])->name('admin.casts.store');
+
+    // Genres
+    Route::get('/admin/genres', [AdminController::class, 'genres'])->name('admin.genres.index');
 });
 
 require __DIR__.'/auth.php';

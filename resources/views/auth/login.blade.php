@@ -1,47 +1,47 @@
-<x-guest-layout>
-    <!-- Session Status -->
-    <x-auth-session-status class="mb-4" :status="session('status')" />
+<x-layouts.netflix title="Sign In - HabeshaFlix">
+    <header class="nf-header nf-header-landing">
+        <a class="nf-logo" href="{{ route('landing') }}">HABESHAFLIX</a>
+    </header>
 
-    <form method="POST" action="{{ route('login') }}">
-        @csrf
+    <main class="nf-signin">
+        <form class="nf-form" method="POST" action="{{ route('login') }}">
+            @csrf
+            <h1>Sign In</h1>
 
-        <!-- Email Address -->
-        <div>
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autofocus autocomplete="username" />
-            <x-input-error :messages="$errors->get('email')" class="mt-2" />
-        </div>
+            <!-- Session Status -->
+            <x-auth-session-status class="mb-4" :status="session('status')" />
 
-        <!-- Password -->
-        <div class="mt-4">
-            <x-input-label for="password" :value="__('Password')" />
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display: block; margin-bottom: 0.5rem; color: #b3b3b3;">Email</label>
+                <input id="email" type="email" name="email" :value="old('email')" required autofocus autocomplete="username" 
+                    style="width: 100%; padding: 0.75rem; background: #333; border: none; border-radius: 4px; color: white;">
+                <x-input-error :messages="$errors->get('email')" style="color: #e50914; font-size: 0.8rem; margin-top: 0.25rem;" />
+            </div>
 
-            <x-text-input id="password" class="block mt-1 w-full"
-                            type="password"
-                            name="password"
-                            required autocomplete="current-password" />
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display: block; margin-bottom: 0.5rem; color: #b3b3b3;">Password</label>
+                <input id="password" type="password" name="password" required autocomplete="current-password"
+                    style="width: 100%; padding: 0.75rem; background: #333; border: none; border-radius: 4px; color: white;">
+                <x-input-error :messages="$errors->get('password')" style="color: #e50914; font-size: 0.8rem; margin-top: 0.25rem;" />
+            </div>
 
-            <x-input-error :messages="$errors->get('password')" class="mt-2" />
-        </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                <label style="display: flex; align-items: center; color: #b3b3b3; font-size: 0.85rem;">
+                    <input type="checkbox" name="remember" style="margin-right: 0.5rem;">
+                    Remember me
+                </label>
+                @if (Route::has('password.request'))
+                    <a href="{{ route('password.request') }}" style="color: #b3b3b3; font-size: 0.85rem; text-decoration: none;">Forgot password?</a>
+                @endif
+            </div>
 
-        <!-- Remember Me -->
-        <div class="block mt-4">
-            <label for="remember_me" class="inline-flex items-center">
-                <input id="remember_me" type="checkbox" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500" name="remember">
-                <span class="ms-2 text-sm text-gray-600">{{ __('Remember me') }}</span>
-            </label>
-        </div>
+            <button type="submit" class="nf-btn nf-btn-danger" style="width: 100%; padding: 0.8rem; font-size: 1rem;">
+                Sign In
+            </button>
 
-        <div class="flex items-center justify-end mt-4">
-            @if (Route::has('password.request'))
-                <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('password.request') }}">
-                    {{ __('Forgot your password?') }}
-                </a>
-            @endif
-
-            <x-primary-button class="ms-3">
-                {{ __('Log in') }}
-            </x-primary-button>
-        </div>
-    </form>
-</x-guest-layout>
+            <p style="margin-top: 2rem; color: #737373;">
+                New to HabeshaFlix? <a href="{{ route('register') }}" style="color: #fff; text-decoration: none;">Sign up now</a>.
+            </p>
+        </form>
+    </main>
+</x-layouts.netflix>

@@ -1,52 +1,48 @@
-<x-guest-layout>
-    <form method="POST" action="{{ route('register') }}">
-        @csrf
+<x-layouts.netflix title="Sign Up - HabeshaFlix">
+    <header class="nf-header nf-header-landing">
+        <a class="nf-logo" href="{{ route('landing') }}">HABESHAFLIX</a>
+    </header>
 
-        <!-- Name -->
-        <div>
-            <x-input-label for="name" :value="__('Name')" />
-            <x-text-input id="name" class="block mt-1 w-full" type="text" name="name" :value="old('name')" required autofocus autocomplete="name" />
-            <x-input-error :messages="$errors->get('name')" class="mt-2" />
-        </div>
+    <main class="nf-signin">
+        <form class="nf-form" method="POST" action="{{ route('register') }}">
+            @csrf
+            <h1>Sign Up</h1>
 
-        <!-- Email Address -->
-        <div class="mt-4">
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autocomplete="username" />
-            <x-input-error :messages="$errors->get('email')" class="mt-2" />
-        </div>
+            <div style="margin-bottom: 1.2rem;">
+                <label style="display: block; margin-bottom: 0.4rem; color: #b3b3b3;">Name</label>
+                <input id="name" type="text" name="name" :value="old('name')" required autofocus autocomplete="name" 
+                    style="width: 100%; padding: 0.75rem; background: #333; border: none; border-radius: 4px; color: white;">
+                <x-input-error :messages="$errors->get('name')" style="color: #e50914; font-size: 0.8rem; margin-top: 0.25rem;" />
+            </div>
 
-        <!-- Password -->
-        <div class="mt-4">
-            <x-input-label for="password" :value="__('Password')" />
+            <div style="margin-bottom: 1.2rem;">
+                <label style="display: block; margin-bottom: 0.4rem; color: #b3b3b3;">Email</label>
+                <input id="email" type="email" name="email" :value="old('email')" required autocomplete="username" 
+                    style="width: 100%; padding: 0.75rem; background: #333; border: none; border-radius: 4px; color: white;">
+                <x-input-error :messages="$errors->get('email')" style="color: #e50914; font-size: 0.8rem; margin-top: 0.25rem;" />
+            </div>
 
-            <x-text-input id="password" class="block mt-1 w-full"
-                            type="password"
-                            name="password"
-                            required autocomplete="new-password" />
+            <div style="margin-bottom: 1.2rem;">
+                <label style="display: block; margin-bottom: 0.4rem; color: #b3b3b3;">Password</label>
+                <input id="password" type="password" name="password" required autocomplete="new-password"
+                    style="width: 100%; padding: 0.75rem; background: #333; border: none; border-radius: 4px; color: white;">
+                <x-input-error :messages="$errors->get('password')" style="color: #e50914; font-size: 0.8rem; margin-top: 0.25rem;" />
+            </div>
 
-            <x-input-error :messages="$errors->get('password')" class="mt-2" />
-        </div>
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display: block; margin-bottom: 0.4rem; color: #b3b3b3;">Confirm Password</label>
+                <input id="password_confirmation" type="password" name="password_confirmation" required autocomplete="new-password"
+                    style="width: 100%; padding: 0.75rem; background: #333; border: none; border-radius: 4px; color: white;">
+                <x-input-error :messages="$errors->get('password_confirmation')" style="color: #e50914; font-size: 0.8rem; margin-top: 0.25rem;" />
+            </div>
 
-        <!-- Confirm Password -->
-        <div class="mt-4">
-            <x-input-label for="password_confirmation" :value="__('Confirm Password')" />
+            <button type="submit" class="nf-btn nf-btn-danger" style="width: 100%; padding: 0.8rem; font-size: 1rem;">
+                Register
+            </button>
 
-            <x-text-input id="password_confirmation" class="block mt-1 w-full"
-                            type="password"
-                            name="password_confirmation" required autocomplete="new-password" />
-
-            <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
-        </div>
-
-        <div class="flex items-center justify-end mt-4">
-            <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('login') }}">
-                {{ __('Already registered?') }}
-            </a>
-
-            <x-primary-button class="ms-4">
-                {{ __('Register') }}
-            </x-primary-button>
-        </div>
-    </form>
-</x-guest-layout>
+            <p style="margin-top: 2rem; color: #737373;">
+                Already have an account? <a href="{{ route('login') }}" style="color: #fff; text-decoration: none;">Sign in now</a>.
+            </p>
+        </form>
+    </main>
+</x-layouts.netflix>

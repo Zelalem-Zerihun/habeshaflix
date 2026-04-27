@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Movie;
+use App\Models\Genre;
 use Illuminate\View\View;
 
 class NetflixController extends Controller
@@ -11,16 +13,9 @@ class NetflixController extends Controller
         return view('netflix.landing');
     }
 
-    public function profiles(): View
+    public function profiles()
     {
-        return view('netflix.profiles', [
-            'profiles' => [
-                ['name' => 'Family', 'image' => 'https://placehold.co/180x180/ef4444/ffffff?text=Family'],
-                ['name' => 'Kids', 'image' => 'https://placehold.co/180x180/22c55e/ffffff?text=Kids'],
-                ['name' => 'Zola', 'image' => 'https://placehold.co/180x180/3b82f6/ffffff?text=Zola'],
-                ['name' => 'Guest', 'image' => 'https://placehold.co/180x180/f59e0b/ffffff?text=Guest'],
-            ],
-        ]);
+        return redirect()->route('browse');
     }
 
     public function browse(): View
@@ -48,60 +43,53 @@ class NetflixController extends Controller
         return view('netflix.my-list', $this->libraryData('My List'));
     }
 
-    public function watch(string $slug = 'featured-trailer'): View
+    public function watch(Movie $movie): View
     {
         return view('netflix.watch', [
-            'slug' => str_replace('-', ' ', $slug),
-            'poster' => 'https://placehold.co/1200x675/111827/e5e7eb?text=Now+Playing',
+            'movie' => $movie,
         ]);
     }
 
-    public function signIn(): View
+    public function signIn()
     {
-        return view('netflix.signin');
+        return redirect()->route('login');
     }
 
     private function libraryData(string $page): array
     {
+        $latestMovies = Movie::where('status', 'approved')->latest()->take(10)->get();
+        $heroMovie = $latestMovies->first();
+
+        $rows = [
+            [
+                'title' => 'Trending Now',
+                'items' => $latestMovies,
+            ],
+        ];
+
+        // Add dynamic rows based on genres
+        $genres = Genre::with(['movies' => function($query) {
+            $query->where('status', 'approved')->latest()->take(10);
+        }])->get();
+
+        foreach ($genres as $genre) {
+            if ($genre->movies->isNotEmpty()) {
+                $rows[] = [
+                    'title' => $genre->name . ' Spotlight',
+                    'items' => $genre->movies,
+                ];
+            }
+        }
+
         return [
             'page' => $page,
             'hero' => [
-                'title' => 'Habesha Originals',
-                'description' => 'Stream trending Ethiopian movies, drama series, and stand-up specials in one place.',
-                'backdrop' => 'https://placehold.co/1600x900/0f172a/f8fafc?text=Featured+Show',
+                'title' => $heroMovie?->title ?? 'Habesha Originals',
+                'description' => $heroMovie?->description ?? 'Stream trending Ethiopian movies, drama series, and stand-up specials in one place.',
+                'backdrop' => $heroMovie ? "https://img.youtube.com/vi/{$heroMovie->youtube_id}/maxresdefault.jpg" : 'https://placehold.co/1600x900/0f172a/f8fafc?text=Featured+Show',
+                'movie' => $heroMovie,
             ],
-            'rows' => [
-                [
-                    'title' => 'Trending Now',
-                    'items' => $this->makeCards('Trending', 8),
-                ],
-                [
-                    'title' => 'Top Picks For You',
-                    'items' => $this->makeCards('Top Pick', 8),
-                ],
-                [
-                    'title' => 'Action & Adventure',
-                    'items' => $this->makeCards('Action', 8),
-                ],
-                [
-                    'title' => 'Drama Spotlight',
-                    'items' => $this->makeCards('Drama', 8),
-                ],
-            ],
+            'rows' => $rows,
         ];
-    }
-
-    private function makeCards(string $prefix, int $count): array
-    {
-        $items = [];
-
-        for ($i = 1; $i <= $count; $i++) {
-            $items[] = [
-                'title' => "{$prefix} {$i}",
-                'image' => "https://placehold.co/320x180/1f2937/f9fafb?text={$prefix}+{$i}",
-            ];
-        }
-
-        return $items;
     }
 }
