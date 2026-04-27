@@ -12,12 +12,40 @@
             @endif
         @endauth
     </nav>
-    <form method="POST" action="{{ route('logout') }}" id="logout-form" style="display: none;">
-        @csrf
-    </form>
-    <a class="nf-btn nf-btn-muted nf-small-btn" href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-        Switch Account
-    </a>
+    <div style="display: flex; align-items: center; gap: 1.5rem;">
+        @auth
+            <div class="nf-user-dropdown" style="position: relative;">
+                <button style="background: transparent; border: none; color: #fff; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; font-weight: 500;">
+                    <div style="width: 32px; height: 32px; background: #e50914; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.9rem;">
+                        {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
+                    </div>
+                    <span style="font-size: 0.9rem;">{{ auth()->user()->name }}</span>
+                    <span style="font-size: 0.6rem;">▼</span>
+                </button>
+                <div class="nf-dropdown-content" style="display: none; position: absolute; top: 100%; right: 0; background: rgba(0,0,0,0.9); border: 1px solid #333; min-width: 160px; border-radius: 4px; padding: 0.5rem 0; z-index: 100;">
+                    <a href="{{ route('profile.edit') }}" style="display: block; padding: 0.6rem 1rem; font-size: 0.85rem; color: #fff;">Edit Profile</a>
+                    <a href="{{ route('dashboard') }}" style="display: block; padding: 0.6rem 1rem; font-size: 0.85rem; color: #fff;">Dashboard</a>
+                    <div style="height: 1px; background: #333; margin: 0.4rem 0;"></div>
+                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <button type="submit" style="width: 100%; text-align: left; background: transparent; border: none; color: #fff; padding: 0.6rem 1rem; font-size: 0.85rem; cursor: pointer;">Sign Out</button>
+                    </form>
+                </div>
+            </div>
+
+            <style>
+                .nf-user-dropdown:hover .nf-dropdown-content {
+                    display: block !important;
+                }
+                .nf-dropdown-content a:hover {
+                    text-decoration: underline;
+                    background: rgba(255,255,255,0.1);
+                }
+            </style>
+        @else
+            <a class="nf-btn nf-btn-danger nf-small-btn" href="{{ route('login') }}">Sign In</a>
+        @endauth
+    </div>
 </header>
 
 <section class="nf-hero" style="background-image:linear-gradient(to top, #0b0b0b 15%, rgba(11,11,11,0.4)), url('{{ $hero['backdrop'] }}');">

@@ -11,7 +11,18 @@
                     <div class="nf-card-meta">
                         <span>{{ $movie->year }}</span>
                     </div>
-                    <a class="nf-link-btn" href="{{ route('watch', $movie) }}">Watch</a>
+                    <div style="display: flex; gap: 0.5rem; align-items: center; margin-top: 0.8rem;">
+                        <a class="nf-link-btn" href="{{ route('watch', $movie) }}" style="background: #fff; color: #000; font-weight: bold; border: none;">Play</a>
+                        
+                        @auth
+                            <form action="{{ route('watchlist.toggle', $movie) }}" method="POST">
+                                @csrf
+                                <button type="submit" class="nf-link-btn" style="background: rgba(109, 109, 110, 0.7); color: #fff; border: none; cursor: pointer;">
+                                    {{ auth()->user()->watchlistMovies->contains($movie->id) ? '✓ My List' : '+ My List' }}
+                                </button>
+                            </form>
+                        @endauth
+                    </div>
                 </div>
             </article>
         @empty

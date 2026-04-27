@@ -20,6 +20,8 @@ Route::get('/watch/{movie}', [NetflixController::class, 'watch'])->name('watch')
 Route::middleware('auth')->group(function () {
     Route::view('/dashboard', 'dashboard')->name('dashboard');
 
+    Route::post('/watchlist/{movie}/toggle', [\App\Http\Controllers\WatchlistController::class, 'toggle'])->name('watchlist.toggle');
+
     Route::get('/movies/create', [MovieController::class, 'create'])->name('movies.create');
     Route::post('/movies', [MovieController::class, 'store'])->name('movies.store');
 

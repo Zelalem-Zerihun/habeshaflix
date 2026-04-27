@@ -1,38 +1,41 @@
 <section>
     <header>
-        <h2 class="text-lg font-medium text-gray-900">
+        <h2 style="font-size: 1.25rem; font-weight: 600; color: #fff; margin: 0 0 0.5rem 0;">
             {{ __('Update Password') }}
         </h2>
 
-        <p class="mt-1 text-sm text-gray-600">
+        <p style="color: #b3b3b3; font-size: 0.9rem; margin-bottom: 2rem;">
             {{ __('Ensure your account is using a long, random password to stay secure.') }}
         </p>
     </header>
 
-    <form method="post" action="{{ route('password.update') }}" class="mt-6 space-y-6">
+    <form method="post" action="{{ route('password.update') }}" style="display: grid; gap: 1.5rem;">
         @csrf
         @method('put')
 
         <div>
-            <x-input-label for="update_password_current_password" :value="__('Current Password')" />
-            <x-text-input id="update_password_current_password" name="current_password" type="password" class="mt-1 block w-full" autocomplete="current-password" />
-            <x-input-error :messages="$errors->updatePassword->get('current_password')" class="mt-2" />
+            <label for="update_password_current_password" style="display: block; margin-bottom: 0.5rem; color: #fff;">{{ __('Current Password') }}</label>
+            <input id="update_password_current_password" name="current_password" type="password" autocomplete="current-password"
+                style="width: 100%; padding: 0.75rem; background: #333; border: 1px solid #444; border-radius: 4px; color: #fff;">
+            <x-input-error :messages="$errors->updatePassword->get('current_password')" style="color: #e50914; font-size: 0.85rem; margin-top: 0.25rem;" />
         </div>
 
         <div>
-            <x-input-label for="update_password_password" :value="__('New Password')" />
-            <x-text-input id="update_password_password" name="password" type="password" class="mt-1 block w-full" autocomplete="new-password" />
-            <x-input-error :messages="$errors->updatePassword->get('password')" class="mt-2" />
+            <label for="update_password_password" style="display: block; margin-bottom: 0.5rem; color: #fff;">{{ __('New Password') }}</label>
+            <input id="update_password_password" name="password" type="password" autocomplete="new-password"
+                style="width: 100%; padding: 0.75rem; background: #333; border: 1px solid #444; border-radius: 4px; color: #fff;">
+            <x-input-error :messages="$errors->updatePassword->get('password')" style="color: #e50914; font-size: 0.85rem; margin-top: 0.25rem;" />
         </div>
 
         <div>
-            <x-input-label for="update_password_password_confirmation" :value="__('Confirm Password')" />
-            <x-text-input id="update_password_password_confirmation" name="password_confirmation" type="password" class="mt-1 block w-full" autocomplete="new-password" />
-            <x-input-error :messages="$errors->updatePassword->get('password_confirmation')" class="mt-2" />
+            <label for="update_password_password_confirmation" style="display: block; margin-bottom: 0.5rem; color: #fff;">{{ __('Confirm Password') }}</label>
+            <input id="update_password_password_confirmation" name="password_confirmation" type="password" autocomplete="new-password"
+                style="width: 100%; padding: 0.75rem; background: #333; border: 1px solid #444; border-radius: 4px; color: #fff;">
+            <x-input-error :messages="$errors->updatePassword->get('password_confirmation')" style="color: #e50914; font-size: 0.85rem; margin-top: 0.25rem;" />
         </div>
 
-        <div class="flex items-center gap-4">
-            <x-primary-button>{{ __('Save') }}</x-primary-button>
+        <div style="display: flex; align-items: center; gap: 1rem;">
+            <button type="submit" class="nf-btn nf-btn-danger" style="padding: 0.7rem 2rem;">{{ __('Save') }}</button>
 
             @if (session('status') === 'password-updated')
                 <p
@@ -40,7 +43,7 @@
                     x-show="show"
                     x-transition
                     x-init="setTimeout(() => show = false, 2000)"
-                    class="text-sm text-gray-600"
+                    style="color: #10b981; font-size: 0.9rem;"
                 >{{ __('Saved.') }}</p>
             @endif
         </div>

@@ -1,10 +1,10 @@
 <section>
     <header>
-        <h2 class="text-lg font-medium text-gray-900">
+        <h2 style="font-size: 1.25rem; font-weight: 600; color: #fff; margin: 0 0 0.5rem 0;">
             {{ __('Profile Information') }}
         </h2>
 
-        <p class="mt-1 text-sm text-gray-600">
+        <p style="color: #b3b3b3; font-size: 0.9rem; margin-bottom: 2rem;">
             {{ __("Update your account's profile information and email address.") }}
         </p>
     </header>
@@ -13,33 +13,35 @@
         @csrf
     </form>
 
-    <form method="post" action="{{ route('profile.update') }}" class="mt-6 space-y-6">
+    <form method="post" action="{{ route('profile.update') }}" style="display: grid; gap: 1.5rem;">
         @csrf
         @method('patch')
 
         <div>
-            <x-input-label for="name" :value="__('Name')" />
-            <x-text-input id="name" name="name" type="text" class="mt-1 block w-full" :value="old('name', $user->name)" required autofocus autocomplete="name" />
-            <x-input-error class="mt-2" :messages="$errors->get('name')" />
+            <label for="name" style="display: block; margin-bottom: 0.5rem; color: #fff;">{{ __('Name') }}</label>
+            <input id="name" name="name" type="text" value="{{ old('name', $user->name) }}" required autofocus autocomplete="name" 
+                style="width: 100%; padding: 0.75rem; background: #333; border: 1px solid #444; border-radius: 4px; color: #fff;">
+            <x-input-error class="mt-2" :messages="$errors->get('name')" style="color: #e50914; font-size: 0.85rem; margin-top: 0.25rem;" />
         </div>
 
         <div>
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" name="email" type="email" class="mt-1 block w-full" :value="old('email', $user->email)" required autocomplete="username" />
-            <x-input-error class="mt-2" :messages="$errors->get('email')" />
+            <label for="email" style="display: block; margin-bottom: 0.5rem; color: #fff;">{{ __('Email') }}</label>
+            <input id="email" name="email" type="email" value="{{ old('email', $user->email) }}" required autocomplete="username"
+                style="width: 100%; padding: 0.75rem; background: #333; border: 1px solid #444; border-radius: 4px; color: #fff;">
+            <x-input-error class="mt-2" :messages="$errors->get('email')" style="color: #e50914; font-size: 0.85rem; margin-top: 0.25rem;" />
 
             @if ($user instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && ! $user->hasVerifiedEmail())
                 <div>
-                    <p class="text-sm mt-2 text-gray-800">
+                    <p style="font-size: 0.9rem; color: #fff; margin-top: 0.5rem;">
                         {{ __('Your email address is unverified.') }}
 
-                        <button form="send-verification" class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                        <button form="send-verification" style="background: transparent; border: none; color: #e50914; text-decoration: underline; cursor: pointer; padding: 0;">
                             {{ __('Click here to re-send the verification email.') }}
                         </button>
                     </p>
 
                     @if (session('status') === 'verification-link-sent')
-                        <p class="mt-2 font-medium text-sm text-green-600">
+                        <p style="margin-top: 0.5rem; font-weight: 500; font-size: 0.85rem; color: #10b981;">
                             {{ __('A new verification link has been sent to your email address.') }}
                         </p>
                     @endif
@@ -47,8 +49,8 @@
             @endif
         </div>
 
-        <div class="flex items-center gap-4">
-            <x-primary-button>{{ __('Save') }}</x-primary-button>
+        <div style="display: flex; align-items: center; gap: 1rem;">
+            <button type="submit" class="nf-btn nf-btn-danger" style="padding: 0.7rem 2rem;">{{ __('Save') }}</button>
 
             @if (session('status') === 'profile-updated')
                 <p
@@ -56,7 +58,7 @@
                     x-show="show"
                     x-transition
                     x-init="setTimeout(() => show = false, 2000)"
-                    class="text-sm text-gray-600"
+                    style="color: #10b981; font-size: 0.9rem;"
                 >{{ __('Saved.') }}</p>
             @endif
         </div>

@@ -25,6 +25,19 @@
                 <span style="color: #46d369; font-weight: bold;">{{ rand(90, 99) }}% Match</span>
                 <span>{{ $movie->year }}</span>
                 <span style="border: 1px solid #a3a3a3; padding: 0 0.4rem; font-size: 0.8rem;">HD</span>
+                
+                @auth
+                    <form action="{{ route('watchlist.toggle', $movie) }}" method="POST">
+                        @csrf
+                        <button type="submit" style="background: rgba(109, 109, 110, 0.7); color: #fff; border: 1px solid rgba(255,255,255,0.3); padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; font-weight: bold; display: flex; align-items: center; gap: 0.5rem;">
+                            @if(auth()->user()->watchlistMovies->contains($movie->id))
+                                <span>✓</span> My List
+                            @else
+                                <span style="font-size: 1.2rem;">+</span> My List
+                            @endif
+                        </button>
+                    </form>
+                @endauth
             </div>
             <p style="font-size: 1.1rem; line-height: 1.6; max-width: 800px; color: #e5e5e5;">
                 {{ $movie->description ?: 'No description available for this movie.' }}

@@ -40,7 +40,24 @@ class NetflixController extends Controller
 
     public function myList(): View
     {
-        return view('netflix.my-list', $this->libraryData('My List'));
+        $user = auth()->user();
+        $movies = $user->watchlistMovies()->where('status', 'approved')->latest()->get();
+
+        return view('netflix.my-list', [
+            'page' => 'My List',
+            'hero' => [
+                'title' => 'My List',
+                'description' => 'Your favorite movies and shows saved for later.',
+                'backdrop' => $movies->first() ? "https://img.youtube.com/vi/{$movies->first()->youtube_id}/maxresdefault.jpg" : 'https://placehold.co/1600x900/0f172a/f8fafc?text=My+List',
+                'movie' => $movies->first(),
+            ],
+            'rows' => [
+                [
+                    'title' => 'My Watchlist',
+                    'items' => $movies,
+                ]
+            ],
+        ]);
     }
 
     public function watch(Movie $movie): View
