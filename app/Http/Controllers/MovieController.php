@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Movie;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 use Illuminate\View\View;
 
 class MovieController extends Controller
@@ -32,7 +33,7 @@ class MovieController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'title' => ['required', 'string', 'max:255'],
+            'title' => ['nullable', 'string', 'max:255'],
             'youtube_url' => ['required', 'string', 'url'],
             'description' => ['nullable', 'string'],
             'year' => ['nullable', 'integer', 'min:1900', 'max:'.(date('Y') + 5)],
@@ -53,8 +54,17 @@ class MovieController extends Controller
             return back()->withErrors(['youtube_url' => 'This movie has already been submitted.'])->withInput();
         }
 
+        $title = $validated['title'];
+        if (empty($title)) {
+            $title = $this->fetchYoutubeTitle($validated['youtube_url']);
+        }
+
+        if (empty($title)) {
+            return back()->withErrors(['title' => 'The title field is required when it cannot be fetched from YouTube.'])->withInput();
+        }
+
         $movie = Movie::create([
-            'title' => $validated['title'],
+            'title' => $title,
             'youtube_id' => $youtubeId,
             'description' => $validated['description'],
             'year' => $validated['year'],
@@ -73,6 +83,25 @@ class MovieController extends Controller
         return redirect()->route('home')->with('status', 'Movie submitted successfully and is awaiting approval.');
     }
 
+    public function fetchTitle(Request $request)
+    {
+        $url = $request->query('url');
+        if (! $url) {
+            return response()->json(['error' => 'URL is required'], 400);
+        }
+
+        \Log::info('Fetching YouTube title for URL: ' . $url);
+        $title = $this->fetchYoutubeTitle($url);
+
+        if (! $title) {
+            \Log::warning('Could not fetch title for URL: ' . $url);
+            return response()->json(['error' => 'Could not fetch title from YouTube'], 422);
+        }
+
+        \Log::info('Successfully fetched title: ' . $title);
+        return response()->json(['title' => $title]);
+    }
+
     public function show(Movie $movie): View
     {
         abort_unless($movie->status === 'approved' || (auth()->check() && (auth()->user()->isAdmin() || auth()->id() === $movie->created_by)), 404);
@@ -82,6 +111,26 @@ class MovieController extends Controller
         return view('movies.show', [
             'movie' => $movie,
         ]);
+    }
+
+    private function fetchYoutubeTitle(string $url): ?string
+    {
+        try {
+            $response = Http::withoutVerifying()->get('https://www.youtube.com/oembed', [
+                'url' => $url,
+                'format' => 'json',
+            ]);
+
+            if ($response->successful()) {
+                return $response->json('title');
+            }
+            
+            \Log::error('YouTube oEmbed failed: ' . $response->status() . ' - ' . $response->body());
+        } catch (\Exception $e) {
+            \Log::error('YouTube oEmbed exception: ' . $e->getMessage());
+        }
+
+        return null;
     }
 
     private function extractYoutubeId(string $url): ?string

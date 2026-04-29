@@ -1,4 +1,7 @@
 <x-layouts.netflix title="HabeshaFlix - Submit Movie">
+    <!-- Fallback for Alpine.js if local build is failing -->
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
     <header class="nf-header">
         <a class="nf-logo" href="{{ route('home') }}">HABESHAFLIX</a>
         <a class="nf-btn nf-btn-muted nf-small-btn" href="{{ route('home') }}">Back to Home</a>
@@ -10,8 +13,52 @@
             
             <p style="color: #b3b3b3; margin-bottom: 2rem;">Share your favorite movies with the community. Once submitted, our team will review it for approval.</p>
 
-            <form action="{{ route('movies.store') }}" method="POST" style="display: grid; gap: 1.5rem;">
+            <form 
+                id="movieForm"
+                action="{{ route('movies.store') }}" 
+                method="POST" 
+                style="display: grid; gap: 1.5rem;"
+                x-data="movieSubmitForm()"
+            >
                 @csrf
+
+                <div>
+                    <label for="youtube_url" style="display: block; margin-bottom: .5rem; font-weight: 500;">YouTube URL</label>
+                    <div style="display: flex; gap: 0.5rem; align-items: flex-start;">
+                        <div style="position: relative; flex: 1;">
+                            <input 
+                                type="url" 
+                                name="youtube_url" 
+                                id="youtube_url" 
+                                x-model="youtubeUrl"
+                                @input.debounce.1000ms="fetchTitle()"
+                                required
+                                style="width: 100%; padding: .75rem; border-radius: .3rem; background: #333; border: 1px solid #444; color: #fff;"
+                                placeholder="Paste YouTube link here..."
+                            >
+                            <!-- Spinner: Hidden by default with display:none -->
+                            <div x-show="isFetching" style="display: none; position: absolute; right: 10px; top: 50%; transform: translateY(-50%);">
+                                <svg class="nf-spinner" viewBox="0 0 50 50" style="width: 20px; height: 20px;">
+                                    <circle cx="25" cy="25" r="20" fill="none" stroke="#e50914" stroke-width="5"></circle>
+                                </svg>
+                            </div>
+                        </div>
+                        <button 
+                            type="button" 
+                            @click="fetchTitle()" 
+                            class="nf-btn" 
+                            style="padding: 0 1.2rem; white-space: nowrap; height: 48px; min-width: 120px; display: flex; align-items: center; justify-content: center;"
+                            :disabled="isFetching"
+                        >
+                            <span x-show="!isFetching">Fetch Title</span>
+                            <span x-show="isFetching">...</span>
+                        </button>
+                    </div>
+                    <p x-show="fetchError" x-text="fetchError" style="display: none; color: #e50914; font-size: .85rem; margin-top: .5rem; font-weight: 500;"></p>
+                    @error('youtube_url')
+                        <p style="color: #e50914; font-size: .85rem; margin-top: .25rem;">{{ $message }}</p>
+                    @enderror
+                </div>
 
                 <div>
                     <label for="title" style="display: block; margin-bottom: .5rem; font-weight: 500;">Movie Title</label>
@@ -19,32 +66,53 @@
                         type="text" 
                         name="title" 
                         id="title" 
-                        value="{{ old('title') }}" 
+                        x-model="movieTitle"
                         required
                         style="width: 100%; padding: .75rem; border-radius: .3rem; background: #333; border: 1px solid #444; color: #fff;"
-                        placeholder="e.g. The Matrix"
+                        placeholder="Title will appear here (you can edit it)"
                     >
                     @error('title')
                         <p style="color: #e50914; font-size: .85rem; margin-top: .25rem;">{{ $message }}</p>
                     @enderror
                 </div>
 
-                <div>
-                    <label for="youtube_url" style="display: block; margin-bottom: .5rem; font-weight: 500;">YouTube URL</label>
-                    <input 
-                        type="url" 
-                        name="youtube_url" 
-                        id="youtube_url" 
-                        value="{{ old('youtube_url') }}" 
-                        required
-                        style="width: 100%; padding: .75rem; border-radius: .3rem; background: #333; border: 1px solid #444; color: #fff;"
-                        placeholder="https://www.youtube.com/watch?v=..."
-                    >
-                    <p style="color: #888; font-size: .8rem; margin-top: .25rem;">We'll automatically extract the video ID.</p>
-                    @error('youtube_url')
-                        <p style="color: #e50914; font-size: .85rem; margin-top: .25rem;">{{ $message }}</p>
-                    @enderror
-                </div>
+                <script>
+                    function movieSubmitForm() {
+                        return {
+                            movieTitle: '{{ old('title', '') }}',
+                            youtubeUrl: '{{ old('youtube_url', '') }}',
+                            isFetching: false,
+                            fetchError: '',
+                            selectedGenres: {!! json_encode(old('genres', [])) !!},
+                            selectedCasts: {!! json_encode(old('casts', [])) !!},
+                            async fetchTitle() {
+                                if (!this.youtubeUrl || this.youtubeUrl.length < 10) {
+                                    this.fetchError = 'Please enter a valid YouTube URL.';
+                                    return;
+                                }
+                                
+                                this.isFetching = true;
+                                this.fetchError = '';
+                                
+                                try {
+                                    const response = await fetch(`{{ route('movies.fetch-title') }}?url=${encodeURIComponent(this.youtubeUrl)}`);
+                                    const data = await response.json();
+                                    
+                                    if (data.title) {
+                                        this.movieTitle = data.title;
+                                        this.fetchError = '';
+                                    } else {
+                                        this.fetchError = data.error || 'Could not fetch title.';
+                                    }
+                                } catch (err) {
+                                    this.fetchError = 'Network error. Please try again.';
+                                } finally {
+                                    this.isFetching = false;
+                                }
+                            }
+                        }
+                    }
+                </script>
 
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                     <div>
@@ -65,10 +133,7 @@
                     </div>
                 </div>
 
-                <div x-data="{ 
-                    selectedGenres: {{ json_encode(array_map('strval', old('genres', []))) }},
-                    selectedCasts: {{ json_encode(array_map('strval', old('casts', []))) }}
-                }">
+                <div>
                     <div style="margin-bottom: 2rem;">
                         <label style="display: block; margin-bottom: 1rem; font-weight: 500; font-size: 1.1rem;">Select Genres</label>
                         <div style="display: flex; flex-wrap: wrap; gap: 0.75rem;">
@@ -111,6 +176,23 @@
                 </div>
 
                 <style>
+                    .nf-spinner {
+                        animation: rotate 2s linear infinite;
+                    }
+                    .nf-spinner circle {
+                        stroke-dasharray: 90, 150;
+                        stroke-dashoffset: 0;
+                        stroke-linecap: round;
+                        animation: dash 1.5s ease-in-out infinite;
+                    }
+                    @keyframes rotate {
+                        100% { transform: rotate(360deg); }
+                    }
+                    @keyframes dash {
+                        0% { stroke-dasharray: 1, 150; stroke-dashoffset: 0; }
+                        50% { stroke-dasharray: 90, 150; stroke-dashoffset: -35; }
+                        100% { stroke-dasharray: 90, 150; stroke-dashoffset: -124; }
+                    }
                     .genre-btn {
                         background: #333;
                         border: 1px solid #444;

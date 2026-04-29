@@ -25,6 +25,7 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/movies/create', [MovieController::class, 'create'])->name('movies.create');
     Route::post('/movies', [MovieController::class, 'store'])->name('movies.store');
+    Route::get('/movies/fetch-title', [MovieController::class, 'fetchTitle'])->name('movies.fetch-title');
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
