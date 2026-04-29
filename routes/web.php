@@ -15,6 +15,7 @@ Route::get('/movies', [NetflixController::class, 'movies'])->name('movies');
 Route::get('/series', [NetflixController::class, 'series'])->name('series');
 Route::get('/new-and-popular', [NetflixController::class, 'newPopular'])->name('new-popular');
 Route::get('/my-list', [NetflixController::class, 'myList'])->name('my-list');
+Route::get('/search', [NetflixController::class, 'search'])->name('search');
 Route::get('/watch/{movie}', [NetflixController::class, 'watch'])->name('watch');
 
 Route::middleware('auth')->group(function () {

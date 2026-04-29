@@ -13,6 +13,21 @@
         @endauth
     </nav>
     <div style="display: flex; align-items: center; gap: 1.5rem;">
+        <form action="{{ route('search') }}" method="GET" class="nf-search-form" style="position: relative;">
+            <input 
+                type="text" 
+                name="q" 
+                placeholder="Titles, actors..." 
+                value="{{ request('q') }}"
+                style="background: rgba(0,0,0,0.75); border: 1px solid #333; color: #fff; padding: 0.4rem 0.8rem 0.4rem 2.2rem; border-radius: 4px; font-size: 0.85rem; width: 200px; transition: width 0.3s ease, border-color 0.3s ease;"
+                onfocus="this.style.width='280px'; this.style.borderColor='#666';"
+                onblur="if(!this.value) { this.style.width='200px'; this.style.borderColor='#333'; }"
+            >
+            <svg style="position: absolute; left: 0.7rem; top: 50%; transform: translateY(-50%); width: 1rem; height: 1rem; color: #999;" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+            </svg>
+        </form>
+
         @auth
             <div class="nf-user-dropdown" style="position: relative;">
                 <button style="background: transparent; border: none; color: #fff; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; font-weight: 500;">

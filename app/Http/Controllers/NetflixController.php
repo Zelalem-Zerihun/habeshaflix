@@ -23,9 +23,53 @@ class NetflixController extends Controller
         return view('netflix.browse', $this->libraryData('Home'));
     }
 
-    public function movies(): View
+    public function movies(\Illuminate\Http\Request $request): View
     {
-        return view('netflix.movies', $this->libraryData('Movies'));
+        $genreId = $request->query('genre');
+        $year = $request->query('year');
+        $sort = $request->query('sort', 'latest');
+
+        $query = Movie::where('status', 'approved');
+
+        if ($genreId) {
+            $query->whereHas('genres', function($q) use ($genreId) {
+                $q->where('genres.id', $genreId);
+            });
+        }
+
+        if ($year) {
+            $query->where('year', $year);
+        }
+
+        switch ($sort) {
+            case 'oldest':
+                $query->oldest();
+                break;
+            case 'title':
+                $query->orderBy('title', 'asc');
+                break;
+            case 'year':
+                $query->orderBy('year', 'desc');
+                break;
+            default:
+                $query->latest();
+                break;
+        }
+
+        $isFiltered = $genreId || $year || $request->has('sort');
+        $data = $this->libraryData('Movies');
+        $data['isFiltered'] = $isFiltered;
+        $data['genres'] = Genre::all();
+        $data['years'] = Movie::whereNotNull('year')->distinct()->orderBy('year', 'desc')->pluck('year');
+
+        if ($isFiltered) {
+            $data['movies'] = $query->get();
+            $data['selectedGenre'] = $genreId;
+            $data['selectedYear'] = $year;
+            $data['selectedSort'] = $sort;
+        }
+        
+        return view('netflix.movies', $data);
     }
 
     public function series(): View
@@ -64,6 +108,30 @@ class NetflixController extends Controller
     {
         return view('netflix.watch', [
             'movie' => $movie,
+        ]);
+    }
+
+    public function search(): View
+    {
+        $query = request('q');
+        
+        $movies = Movie::where('status', 'approved')
+            ->when($query, function($q) use ($query) {
+                $q->where(function($sub) use ($query) {
+                    $sub->where('title', 'like', "%{$query}%")
+                        ->orWhere('description', 'like', "%{$query}%")
+                        ->orWhereHas('castMembers', function($c) use ($query) {
+                            $c->where('name', 'like', "%{$query}%");
+                        });
+                });
+            })
+            ->latest()
+            ->get();
+
+        return view('netflix.search', [
+            'page' => 'Search Results',
+            'query' => $query,
+            'movies' => $movies,
         ]);
     }
 
