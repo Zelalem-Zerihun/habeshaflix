@@ -15,7 +15,10 @@
     <main class="nf-content">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
             <h1 style="margin: 0;">Manage All Movies</h1>
-            <a href="{{ route('movies.create') }}" class="nf-btn nf-btn-danger" style="text-decoration: none; padding: 0.6rem 1.2rem;">+ Add New Movie</a>
+            <div style="display: flex; gap: 1rem;">
+                <a href="{{ route('admin.movies.batch') }}" class="nf-btn" style="text-decoration: none; padding: 0.6rem 1.2rem; background: #333;">Batch Upload</a>
+                <a href="{{ route('movies.create') }}" class="nf-btn nf-btn-danger" style="text-decoration: none; padding: 0.6rem 1.2rem;">+ Add New Movie</a>
+            </div>
         </div>
 
         @if (session('status'))

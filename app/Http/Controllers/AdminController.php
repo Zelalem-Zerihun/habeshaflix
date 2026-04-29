@@ -7,6 +7,7 @@ use App\Models\Genre;
 use App\Models\Movie;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 use Illuminate\View\View;
 
 class AdminController extends Controller
@@ -18,6 +19,84 @@ class AdminController extends Controller
         $totalUsers = \App\Models\User::count();
 
         return view('admin.dashboard', compact('pendingMovies', 'totalMovies', 'totalUsers'));
+    }
+
+    public function batchCreate(): View
+    {
+        return view('admin.movies.batch');
+    }
+
+    public function batchPreview(Request $request): View
+    {
+        $request->validate([
+            'urls' => 'required|string',
+        ]);
+
+        $rawUrls = explode("\n", $request->input('urls'));
+        $movies = [];
+
+        foreach ($rawUrls as $url) {
+            $url = trim($url);
+            if (empty($url)) continue;
+
+            $youtubeId = $this->extractYoutubeId($url);
+            if (!$youtubeId) continue;
+
+            $title = $this->fetchYoutubeTitle($url) ?? 'Unknown Title';
+
+            $movies[] = [
+                'youtube_id' => $youtubeId,
+                'youtube_url' => $url,
+                'title' => $title,
+            ];
+        }
+
+        return view('admin.movies.batch-preview', compact('movies'));
+    }
+
+    public function batchStore(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'movies' => 'required|array',
+            'movies.*.title' => 'required|string|max:255',
+            'movies.*.youtube_id' => 'required|string|max:255',
+            'movies.*.youtube_url' => 'required|url',
+        ]);
+
+        $count = 0;
+        foreach ($validated['movies'] as $movieData) {
+            if (Movie::where('youtube_id', $movieData['youtube_id'])->exists()) {
+                continue;
+            }
+
+            Movie::create([
+                'title' => $movieData['title'],
+                'youtube_id' => $movieData['youtube_id'],
+                'status' => 'approved',
+                'created_by' => auth()->id(),
+            ]);
+            $count++;
+        }
+
+        return redirect()->route('admin.movies.index')->with('status', "Successfully added {$count} movies in batch.");
+    }
+
+    private function fetchYoutubeTitle(string $url): ?string
+    {
+        try {
+            $response = Http::withoutVerifying()->get('https://www.youtube.com/oembed', [
+                'url' => $url,
+                'format' => 'json',
+            ]);
+
+            if ($response->successful()) {
+                return $response->json('title');
+            }
+        } catch (\Exception $e) {
+            // Log error if needed
+        }
+
+        return null;
     }
 
     public function approveMovie(Movie $movie): RedirectResponse
