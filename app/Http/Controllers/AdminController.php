@@ -51,7 +51,10 @@ class AdminController extends Controller
             ];
         }
 
-        return view('admin.movies.batch-preview', compact('movies'));
+        $genres = Genre::all();
+        $casts = Cast::all();
+
+        return view('admin.movies.batch-preview', compact('movies', 'genres', 'casts'));
     }
 
     public function batchStore(Request $request): RedirectResponse
@@ -61,6 +64,12 @@ class AdminController extends Controller
             'movies.*.title' => 'required|string|max:255',
             'movies.*.youtube_id' => 'required|string|max:255',
             'movies.*.youtube_url' => 'required|url',
+            'movies.*.year' => 'nullable|integer|min:1900|max:' . (date('Y') + 5),
+            'movies.*.description' => 'nullable|string',
+            'movies.*.genres' => 'nullable|array',
+            'movies.*.genres.*' => 'exists:genres,id',
+            'movies.*.casts' => 'nullable|array',
+            'movies.*.casts.*' => 'exists:casts,id',
         ]);
 
         $count = 0;
@@ -69,12 +78,23 @@ class AdminController extends Controller
                 continue;
             }
 
-            Movie::create([
+            $movie = Movie::create([
                 'title' => $movieData['title'],
                 'youtube_id' => $movieData['youtube_id'],
+                'description' => $movieData['description'] ?? null,
+                'year' => $movieData['year'] ?? null,
                 'status' => 'approved',
                 'created_by' => auth()->id(),
             ]);
+
+            if (!empty($movieData['genres'])) {
+                $movie->genres()->attach($movieData['genres']);
+            }
+
+            if (!empty($movieData['casts'])) {
+                $movie->castMembers()->attach($movieData['casts']);
+            }
+
             $count++;
         }
 
