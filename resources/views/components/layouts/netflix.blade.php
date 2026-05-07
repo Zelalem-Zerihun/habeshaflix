@@ -4,34 +4,58 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ $title ?? 'HabeshaFlix' }}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     @endif
     <style>
         :root {
-            --bg: #0b0b0b;
-            --panel: #141414;
-            --text: #f5f5f5;
-            --muted: #b3b3b3;
+            --bg: #080808;
+            --panel: #121212;
+            --text: #ffffff;
+            --muted: #a3a3a3;
             --danger: #e50914;
+            --danger-hover: #f40612;
+            --header-height: 70px;
+            --ease-out: cubic-bezier(0.33, 1, 0.68, 1);
         }
 
         * {
             box-sizing: border-box;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
 
         body.nf-body {
             margin: 0;
             min-height: 100vh;
-            font-family: "Segoe UI", Inter, Arial, sans-serif;
-            background: radial-gradient(circle at top, #222 0%, var(--bg) 45%);
+            font-family: 'Be Vietnam Pro', sans-serif;
+            background-color: var(--bg);
             color: var(--text);
-            padding-top: 80px; /* Space for fixed header */
+            overflow-x: hidden;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #333;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #444;
         }
 
         a {
             color: inherit;
             text-decoration: none;
+            transition: all 0.2s var(--ease-out);
         }
 
         .nf-header {
@@ -39,44 +63,50 @@
             top: 0;
             left: 0;
             width: 100%;
-            z-index: 100;
+            height: var(--header-height);
+            z-index: 1000;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 1rem;
-            padding: 1rem 3rem;
-            backdrop-filter: blur(12px);
-            background: linear-gradient(to bottom, rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0.5));
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 0 4%;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.8) 0%, transparent 100%);
+            transition: background-color 0.4s var(--ease-out);
+        }
+
+        .nf-header.scrolled {
+            background-color: var(--bg);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
         }
 
         .nf-header-landing {
-            position: absolute;
-            max-width: 1200px;
-            margin: 0 auto;
             background: transparent;
             border-bottom: none;
-            backdrop-filter: none;
-            left: 50%;
-            transform: translateX(-50%);
         }
 
         .nf-logo {
             color: var(--danger);
             font-weight: 800;
-            letter-spacing: .08rem;
-            font-size: 1.85rem;
+            letter-spacing: -0.02em;
+            font-size: 1.75rem;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .nf-logo:hover {
+            color: var(--danger-hover);
+            transform: scale(1.02);
         }
 
         .nf-nav {
             display: flex;
-            gap: 1.2rem;
-            font-size: .95rem;
+            gap: 1.5rem;
+            margin-left: 2rem;
+            flex-grow: 1;
         }
 
         .nf-nav a {
-            color: #d4d4d4;
-            transition: color .2s ease;
+            color: #e5e5e5;
+            font-size: 0.875rem;
+            font-weight: 400;
         }
 
         .nf-nav a:hover,
@@ -86,21 +116,26 @@
         }
 
         .nf-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
             border: 0;
             border-radius: 4px;
-            padding: .65rem 1rem;
+            padding: 0.6rem 1.5rem;
             font-weight: 600;
+            font-size: 1rem;
             cursor: pointer;
-            transition: transform .15s ease, opacity .15s ease;
+            gap: 0.5rem;
+            transition: all 0.2s var(--ease-out);
         }
 
-        .nf-btn:hover {
-            transform: translateY(-1px);
-            opacity: .95;
+        .nf-btn:active {
+            transform: scale(0.98);
         }
 
         .nf-small-btn {
-            font-size: .85rem;
+            font-size: 0.85rem;
+            padding: 0.4rem 1rem;
         }
 
         .nf-btn-danger {
@@ -108,254 +143,270 @@
             color: #fff;
         }
 
+        .nf-btn-danger:hover {
+            background: var(--danger-hover);
+            box-shadow: 0 4px 12px rgba(229, 9, 20, 0.3);
+        }
+
         .nf-btn-muted {
-            background: rgba(109, 109, 110, .7);
+            background: rgba(109, 109, 110, 0.5);
             color: #fff;
+            backdrop-filter: blur(4px);
+        }
+
+        .nf-btn-muted:hover {
+            background: rgba(109, 109, 110, 0.8);
         }
 
         .nf-btn-light {
             background: #fff;
-            color: #111;
+            color: #000;
         }
 
+        .nf-btn-light:hover {
+            background: rgba(255, 255, 255, 0.8);
+        }
+
+        /* Hero Center (Landing) */
         .nf-hero-center {
-            max-width: 760px;
-            margin: 12vh auto 0;
+            max-width: 800px;
+            margin: 25vh auto 0;
             text-align: center;
-            padding: 1rem;
+            padding: 0 1.5rem;
+            animation: slideUp 0.8s var(--ease-out);
         }
 
         .nf-hero-center h1 {
-            font-size: clamp(2rem, 6vw, 4rem);
-            margin: 0 0 .75rem;
-            text-wrap: balance;
+            font-size: clamp(2.5rem, 8vw, 4.5rem);
+            font-weight: 800;
+            margin: 0 0 1rem;
+            line-height: 1.1;
         }
 
         .nf-hero-center p {
-            color: var(--muted);
-            font-size: 1.15rem;
+            font-size: clamp(1.1rem, 3vw, 1.5rem);
+            margin-bottom: 2rem;
+            color: #fff;
         }
 
-        .nf-actions {
-            display: flex;
-            justify-content: center;
-            gap: .8rem;
-            flex-wrap: wrap;
-            margin-top: 1.5rem;
-        }
-
-        .nf-profiles {
-            max-width: 1000px;
-            margin: 3rem auto;
-            text-align: center;
-            padding: 0 1rem;
-        }
-
-        .nf-profile-grid {
-            margin: 2.5rem 0;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-            gap: 1.2rem;
-        }
-
-        .nf-profile img {
-            width: 100%;
-            border-radius: .35rem;
-            border: 2px solid transparent;
-            transition: transform .2s ease, border-color .2s ease;
-        }
-
-        .nf-profile:hover img {
-            border-color: #fff;
-            transform: scale(1.03);
-        }
-
-        .nf-profile span {
-            color: #c0c0c0;
-            margin-top: .5rem;
-            display: block;
-        }
-
+        /* Hero (Browse) */
         .nf-hero {
-            min-height: 62vh;
+            position: relative;
+            height: 85vh;
             background-size: cover;
-            background-position: center;
+            background-position: center 20%;
             display: flex;
-            align-items: flex-end;
-            padding: 3rem;
+            align-items: center;
+            padding: 0 4%;
+            margin-bottom: -100px;
+        }
+
+        .nf-hero::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to right, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 60%),
+                        linear-gradient(to top, var(--bg) 0%, transparent 30%);
+            pointer-events: none;
         }
 
         .nf-hero-content {
-            max-width: 680px;
-            animation: fade-in .5s ease;
+            position: relative;
+            z-index: 10;
+            max-width: 600px;
+            animation: fadeIn 1s var(--ease-out);
         }
 
         .nf-kicker {
-            color: #d4d4d4;
+            color: #fff;
             text-transform: uppercase;
-            letter-spacing: .08rem;
-            font-size: .8rem;
+            letter-spacing: 0.2em;
+            font-size: 0.8rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
         }
 
         .nf-hero h1 {
-            margin: .3rem 0;
-            font-size: clamp(2rem, 5vw, 4rem);
-            text-wrap: balance;
+            margin: 0.5rem 0 1rem;
+            font-size: clamp(2.5rem, 6vw, 4rem);
+            font-weight: 800;
+            line-height: 1.1;
+            text-shadow: 2px 2px 10px rgba(0,0,0,0.5);
         }
 
         .nf-hero p {
-            color: #ececec;
-            line-height: 1.5;
+            font-size: 1.1rem;
+            line-height: 1.4;
+            color: #fff;
+            text-shadow: 1px 1px 4px rgba(0,0,0,0.5);
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            margin-bottom: 2rem;
         }
 
+        /* Content */
         .nf-content {
-            padding: 0 3rem 3rem;
+            position: relative;
+            z-index: 20;
+            padding: 0 4% 4rem;
         }
 
         .nf-row {
-            margin-top: 2rem;
+            margin-bottom: 3rem;
         }
 
         .nf-row-header {
             display: flex;
             justify-content: space-between;
-            align-items: center;
+            align-items: flex-end;
+            margin-bottom: 1rem;
         }
 
         .nf-row-header h2 {
             margin: 0;
-            font-size: 1.25rem;
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: #e5e5e5;
+            transition: color 0.3s;
         }
 
-        .nf-row-header a {
-            color: #d1d5db;
-            font-size: .9rem;
+        .nf-row:hover .nf-row-header h2 {
+            color: #fff;
         }
 
+        /* Cards */
         .nf-card-grid {
-            margin-top: .9rem;
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-            gap: .9rem;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1.5rem 0.75rem;
         }
 
         .nf-card {
-            background: var(--panel);
-            border-radius: .45rem;
+            position: relative;
+            border-radius: 4px;
             overflow: hidden;
-            border: 1px solid #222;
-            transition: transform .2s ease, box-shadow .2s ease;
+            background: #181818;
+            transition: transform 0.3s var(--ease-out), z-index 0s 0.3s;
+            cursor: pointer;
         }
 
         .nf-card:hover {
-            transform: scale(1.03) translateY(-2px);
-            box-shadow: 0 8px 24px rgba(0, 0, 0, .4);
+            transform: scale(1.15);
+            z-index: 100;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.6);
+            transition: transform 0.4s var(--ease-out);
         }
 
         .nf-card img {
             width: 100%;
+            aspect-ratio: 16/9;
+            object-fit: cover;
             display: block;
         }
 
         .nf-card-body {
-            padding: .7rem;
+            padding: 1rem;
+            opacity: 0;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,0.7) 100%);
+            transition: opacity 0.3s;
+        }
+
+        .nf-card:hover .nf-card-body {
+            opacity: 1;
         }
 
         .nf-card-body h3 {
-            margin: 0 0 .6rem;
-            font-size: .95rem;
+            margin: 0 0 0.5rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
-        .nf-link-btn {
-            display: inline-block;
-            padding: .35rem .6rem;
-            border-radius: .3rem;
-            background: #272727;
-            font-size: .85rem;
-        }
-
-        .nf-watch {
-            max-width: 980px;
-            margin: 2rem auto;
-            padding: 1rem;
-        }
-
-        .nf-watch img {
-            width: 100%;
-            border-radius: .6rem;
-            border: 1px solid #2a2a2a;
-            box-shadow: 0 15px 40px rgba(0, 0, 0, .35);
-        }
-
+        /* Forms */
         .nf-signin {
-            min-height: calc(100vh - 100px);
-            display: grid;
-            place-items: center;
-            padding: 1rem;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('https://assets.nflxext.com/ffe/siteui/vlv3/f841d4c7-10e1-40af-bca1-0744f902144f/af6a5367-e9a0-4354-9a4d-f4a4347716ed/ET-en-20220502-popsignuptwoweeks-perspective_alpha_website_large.jpg');
+            background-size: cover;
         }
 
         .nf-form {
-            width: min(420px, 100%);
-            background: rgba(0, 0, 0, .75);
-            border-radius: .5rem;
-            padding: 2rem;
+            width: 100%;
+            max-width: 450px;
+            background: rgba(0,0,0,0.75);
+            padding: 60px 68px 40px;
+            border-radius: 4px;
         }
 
         .nf-form h1 {
-            margin-top: 0;
-        }
-
-        .nf-form label {
-            display: block;
-            margin-bottom: 1rem;
-        }
-
-        .nf-form span {
-            display: block;
-            margin-bottom: .4rem;
-            color: var(--muted);
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
         }
 
         .nf-form input {
             width: 100%;
-            border: 1px solid #333;
-            background: #111;
+            height: 50px;
+            background: #333;
+            border: none;
+            border-radius: 4px;
             color: #fff;
-            border-radius: .35rem;
-            padding: .75rem;
+            padding: 0 20px;
+            margin-bottom: 1rem;
+            font-size: 1rem;
         }
 
-        .nf-form p {
-            color: var(--muted);
-            margin-top: 1.2rem;
+        .nf-form input:focus {
+            background: #454545;
+            outline: none;
         }
 
-        @media (max-width: 900px) {
-            .nf-header,
-            .nf-content,
-            .nf-hero {
-                padding-inline: 1rem;
-            }
-
-            .nf-header {
-                flex-wrap: wrap;
-            }
-
-            .nf-nav {
-                width: 100%;
-                overflow-x: auto;
-                white-space: nowrap;
-                padding-bottom: .2rem;
-            }
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
 
-        @keyframes fade-in {
-            from { opacity: 0; transform: translateY(6px); }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
             to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Responsive */
+        @media (max-width: 1100px) {
+            .nf-nav { display: none; }
+            .nf-header { padding: 0 2%; }
+        }
+
+        @media (max-width: 600px) {
+            .nf-form { padding: 40px 30px; }
+            .nf-hero { height: 60vh; }
+            .nf-hero-content h1 { font-size: 2rem; }
         }
     </style>
 </head>
 <body class="nf-body">
     {{ $slot }}
+
+    <script>
+        window.addEventListener('scroll', () => {
+            const header = document.querySelector('.nf-header');
+            if (window.scrollY > 50) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+        });
+    </script>
 </body>
 </html>

@@ -81,10 +81,14 @@
                         return {
                             movieTitle: '{{ old('title', '') }}',
                             youtubeUrl: '{{ old('youtube_url', '') }}',
+                            movieDescription: '{!! addslashes(old('description', '')) !!}',
                             isFetching: false,
+                            isGenerating: false,
                             fetchError: '',
+                            genError: '',
                             selectedGenres: {!! json_encode(old('genres', [])) !!},
                             selectedCasts: {!! json_encode(old('casts', [])) !!},
+                            castNames: { @foreach($casts as $cast) '{{ $cast->id }}': '{{ addslashes($cast->name) }}', @endforeach },
                             async fetchTitle() {
                                 if (!this.youtubeUrl || this.youtubeUrl.length < 10) {
                                     this.fetchError = 'Please enter a valid YouTube URL.';
@@ -108,6 +112,33 @@
                                     this.fetchError = 'Network error. Please try again.';
                                 } finally {
                                     this.isFetching = false;
+                                }
+                            },
+                            async generateDescription() {
+                                if (!this.youtubeUrl || this.youtubeUrl.length < 10) {
+                                    this.genError = 'Please enter a YouTube URL first.';
+                                    return;
+                                }
+
+                                this.isGenerating = true;
+                                this.genError = '';
+
+                                const selectedNames = this.selectedCasts.map(id => this.castNames[id]).filter(name => name).join(', ');
+
+                                try {
+                                    const response = await fetch(`{{ route('movies.generate-description') }}?url=${encodeURIComponent(this.youtubeUrl)}&title=${encodeURIComponent(this.movieTitle)}&casts=${encodeURIComponent(selectedNames)}`);
+                                    const data = await response.json();
+
+                                    if (data.description) {
+                                        this.movieDescription = data.description;
+                                        this.genError = '';
+                                    } else {
+                                        this.genError = data.error || 'Could not generate description.';
+                                    }
+                                } catch (err) {
+                                    this.genError = 'Network error. Please try again.';
+                                } finally {
+                                    this.isGenerating = false;
                                 }
                             }
                         }
@@ -161,9 +192,9 @@
                                         </div>
 
                                         @if($cast->image)
-                                            <img src="{{ $cast->image }}" alt="{{ $cast->name }}" style="width: 70px; height: 70px; border-radius: 50%; object-fit: cover; margin-bottom: 0.5rem; border: 2px solid transparent;" :style="selectedCasts.includes('{{ $cast->id }}') ? 'border-color: #e50914' : ''">
+                                            <img src="{{ $cast->image }}" alt="{{ $cast->name }}" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; margin: 0 auto 0.5rem; border: 2px solid #333; transition: all 0.2s;" :style="selectedCasts.includes('{{ $cast->id }}') ? 'border-color: #e50914; transform: scale(1.05);' : ''">
                                         @else
-                                            <div style="width: 70px; height: 70px; border-radius: 50%; background: #444; margin: 0 auto 0.5rem; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.4rem; color: #fff;" :style="selectedCasts.includes('{{ $cast->id }}') ? 'border: 2px solid #e50914' : ''">
+                                            <div style="width: 80px; height: 80px; border-radius: 50%; background: #333; margin: 0 auto 0.5rem; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.4rem; color: #fff; border: 2px solid transparent; transition: all 0.2s;" :style="selectedCasts.includes('{{ $cast->id }}') ? 'border-color: #e50914; background: #444; transform: scale(1.05);' : ''">
                                                 {{ strtoupper(substr($cast->name, 0, 1)) }}
                                             </div>
                                         @endif
@@ -215,17 +246,43 @@
                     .cast-card-active {
                         background: rgba(229, 9, 20, 0.2) !important;
                     }
+                    .nf-spinner-small {
+                        width: 14px;
+                        height: 14px;
+                        border: 2px solid rgba(255,255,255,.3);
+                        border-radius: 50%;
+                        border-top-color: #fff;
+                        animation: spin 1s ease-in-out infinite;
+                    }
+                    @keyframes spin {
+                        to { transform: rotate(360deg); }
+                    }
                 </style>
 
                 <div>
-                    <label for="description" style="display: block; margin-bottom: .5rem; font-weight: 500;">Description (Optional)</label>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: .5rem;">
+                        <label for="description" style="font-weight: 500;">Description (Optional)</label>
+                        <button 
+                            type="button" 
+                            @click="generateDescription()" 
+                            class="nf-btn nf-btn-muted" 
+                            style="padding: 0.2rem 0.75rem; font-size: 0.8rem; display: flex; align-items: center; gap: 0.5rem;"
+                            :disabled="isGenerating"
+                        >
+                            <svg x-show="!isGenerating" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>
+                            <span x-show="isGenerating" class="nf-spinner-small"></span>
+                            <span x-text="isGenerating ? 'Generating...' : 'Gemini AI Description'"></span>
+                        </button>
+                    </div>
                     <textarea 
                         name="description" 
                         id="description" 
-                        rows="4" 
-                        style="width: 100%; padding: .75rem; border-radius: .3rem; background: #333; border: 1px solid #444; color: #fff; resize: vertical;"
-                        placeholder="Briefly describe the movie..."
-                    >{{ old('description') }}</textarea>
+                        rows="6" 
+                        x-model="movieDescription"
+                        style="width: 100%; padding: .75rem; border-radius: .3rem; background: #333; border: 1px solid #444; color: #fff; resize: vertical; font-size: 0.95rem; line-height: 1.5;"
+                        placeholder="Briefly describe the movie or use Gemini AI to generate one..."
+                    ></textarea>
+                    <p x-show="genError" x-text="genError" style="display: none; color: #e50914; font-size: .85rem; margin-top: .5rem; font-weight: 500;"></p>
                     @error('description')
                         <p style="color: #e50914; font-size: .85rem; margin-top: .25rem;">{{ $message }}</p>
                     @enderror

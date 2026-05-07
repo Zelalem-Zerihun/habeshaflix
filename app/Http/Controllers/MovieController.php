@@ -102,6 +102,65 @@ class MovieController extends Controller
         return response()->json(['title' => $title]);
     }
 
+    public function generateDescription(Request $request)
+    {
+        $url = $request->query('url');
+        $title = $request->query('title');
+        $casts = $request->query('casts');
+        
+        if (! $url) {
+            return response()->json(['error' => 'URL is required'], 400);
+        }
+
+        $apiKey = config('services.gemini.key') ?? env('GEMINI_API_KEY');
+        if (! $apiKey) {
+            return response()->json(['error' => 'Gemini API key not configured'], 500);
+        }
+
+        $castContext = $casts ? " starring " . $casts : "";
+        $prompt = "Act as a professional Netflix Content Editor: Analyze the Amharic movie titled '" . ($title ?? 'Unknown Title') . "'" . $castContext . " at the following YouTube link and provide a cinematic metadata package entirely in Amharic, consisting ONLY of a one-sentence Logline hook and a 2-3 sentence Synopsis teaser. Ensure the description matches the specific content of this movie and mentions the main cast members if appropriate. Movie Link: " . $url;
+
+        try {
+            \Log::info('Calling Gemini API for Movie: ' . ($title ?? 'Unknown') . ' - Casts: ' . ($casts ?? 'None') . ' - URL: ' . $url);
+            // Updated to gemini-2.5-flash as requested
+            $response = Http::withoutVerifying()->post("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={$apiKey}", [
+                'contents' => [
+                    [
+                        'parts' => [
+                            ['text' => $prompt]
+                        ]
+                    ]
+                ]
+            ]);
+
+            if ($response->successful()) {
+                $result = $response->json();
+                $description = $result['candidates'][0]['content']['parts'][0]['text'] ?? null;
+                
+                if ($description) {
+                    \Log::info('Gemini description generated successfully');
+                    return response()->json(['description' => $description]);
+                }
+                
+                \Log::warning('Gemini response successful but no text found: ' . json_encode($result));
+            }
+
+            $errorBody = $response->body();
+            \Log::error('Gemini API failed: ' . $response->status() . ' - ' . $errorBody);
+            
+            $errorMessage = 'Could not generate description from Gemini';
+            $jsonError = json_decode($errorBody, true);
+            if (isset($jsonError['error']['message'])) {
+                $errorMessage .= ': ' . $jsonError['error']['message'];
+            }
+
+            return response()->json(['error' => $errorMessage], 422);
+        } catch (\Exception $e) {
+            \Log::error('Gemini API exception: ' . $e->getMessage());
+            return response()->json(['error' => 'An error occurred while calling Gemini API'], 500);
+        }
+    }
+
     public function show(Movie $movie): View
     {
         abort_unless($movie->status === 'approved' || (auth()->check() && (auth()->user()->isAdmin() || auth()->id() === $movie->created_by)), 404);

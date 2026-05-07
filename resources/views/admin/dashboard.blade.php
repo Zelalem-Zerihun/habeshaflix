@@ -1,91 +1,103 @@
-<x-layouts.netflix title="Admin Dashboard">
-    <header class="nf-header">
-        <div style="display: flex; align-items: center; gap: 2rem;">
-            <a class="nf-logo" href="{{ route('home') }}">HABESHAFLIX ADMIN</a>
-            <nav class="nf-nav">
-                <a class="active" href="{{ route('admin.dashboard') }}">Moderation</a>
-                <a href="{{ route('admin.movies.index') }}">Movies</a>
-                <a href="{{ route('admin.casts.index') }}">Casts</a>
-                <a href="{{ route('admin.genres.index') }}">Genres</a>
-            </nav>
+<x-layouts.admin title="Dashboard">
+    <div class="admin-header">
+        <div class="header-title">
+            <h1>Moderation Dashboard</h1>
+            <p>Overview of system activity and pending approvals.</p>
         </div>
-        <a class="nf-btn nf-btn-muted nf-small-btn" href="{{ route('home') }}">Back to Site</a>
-    </header>
-
-    <main class="nf-content">
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 3rem;">
-            <div class="nf-card" style="padding: 1.5rem; text-align: center;">
-                <h3 style="color: #b3b3b3; margin: 0; font-size: 0.9rem; text-transform: uppercase;">Pending Approval</h3>
-                <p style="font-size: 2.5rem; font-weight: bold; margin: 0.5rem 0;">{{ $pendingMovies->count() }}</p>
-            </div>
-            <div class="nf-card" style="padding: 1.5rem; text-align: center;">
-                <h3 style="color: #b3b3b3; margin: 0; font-size: 0.9rem; text-transform: uppercase;">Total Movies</h3>
-                <p style="font-size: 2.5rem; font-weight: bold; margin: 0.5rem 0;">{{ $totalMovies }}</p>
-            </div>
-            <div class="nf-card" style="padding: 1.5rem; text-align: center;">
-                <h3 style="color: #b3b3b3; margin: 0; font-size: 0.9rem; text-transform: uppercase;">Total Users</h3>
-                <p style="font-size: 2.5rem; font-weight: bold; margin: 0.5rem 0;">{{ $totalUsers }}</p>
-            </div>
+        <div class="header-actions">
+            <a href="{{ route('admin.movies.batch') }}" class="btn btn-outline">Batch Upload</a>
+            <a href="{{ route('movies.create') }}" class="btn btn-primary">+ Add Movie</a>
         </div>
+    </div>
 
-        @if (session('status'))
-            <div style="background: #10b981; color: #fff; padding: 1rem; margin-bottom: 2rem; border-radius: .3rem;">
-                {{ session('status') }}
+    <div class="stats-grid">
+        <div class="stat-card">
+            <span class="stat-label">Pending Approval</span>
+            <span class="stat-value" style="color: var(--warning);">{{ $pendingMovies->count() }}</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-label">Total Movies</span>
+            <span class="stat-value">{{ $totalMovies }}</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-label">Total Users</span>
+            <span class="stat-value">{{ $totalUsers }}</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-label">Genres</span>
+            <span class="stat-value">{{ \App\Models\Genre::count() }}</span>
+        </div>
+    </div>
+
+    @if (session('status'))
+        <div class="alert alert-success">
+            {{ session('status') }}
+        </div>
+    @endif
+
+    <div class="admin-card">
+        <div class="card-header">
+            <h2>Pending Movie Submissions</h2>
+            @if(!$pendingMovies->isEmpty())
+                <span class="badge badge-warning">{{ $pendingMovies->count() }} Actions Required</span>
+            @endif
+        </div>
+        
+        @if ($pendingMovies->isEmpty())
+            <div style="padding: 3rem; text-align: center; color: var(--text-muted);">
+                <p>No pending submissions at the moment. You're all caught up!</p>
+            </div>
+        @else
+            <div style="overflow-x: auto;">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Movie</th>
+                            <th>Submitted By</th>
+                            <th>Year</th>
+                            <th style="text-align: right;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($pendingMovies as $movie)
+                            <tr>
+                                <td>
+                                    <div style="display: flex; align-items: center; gap: 1rem;">
+                                        <img src="https://img.youtube.com/vi/{{ $movie->youtube_id }}/mqdefault.jpg" style="height: 48px; width: 85px; object-fit: cover; border-radius: 0.375rem; border: 1px solid var(--border-color);">
+                                        <div>
+                                            <div style="font-weight: 600;">{{ $movie->title }}</div>
+                                            <a href="https://youtube.com/watch?v={{ $movie->youtube_id }}" target="_blank" style="color: var(--primary); font-size: 0.75rem; font-weight: 500;">Preview Video</a>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                        <div style="width: 24px; height: 24px; background: #e2e8f0; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700;">
+                                            {{ strtoupper(substr($movie->creator->name, 0, 1)) }}
+                                        </div>
+                                        {{ $movie->creator->name }}
+                                    </div>
+                                </td>
+                                <td><span class="badge badge-info">{{ $movie->year ?? 'N/A' }}</span></td>
+                                <td style="text-align: right;">
+                                    <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
+                                        <form action="{{ route('admin.movies.approve', $movie) }}" method="POST">
+                                            @csrf
+                                            @method('PATCH')
+                                            <button type="submit" class="btn btn-sm btn-primary" style="background: var(--success);">Approve</button>
+                                        </form>
+                                        <form action="{{ route('admin.movies.reject', $movie) }}" method="POST">
+                                            @csrf
+                                            @method('PATCH')
+                                            <button type="submit" class="btn btn-sm btn-outline">Reject</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
             </div>
         @endif
-
-        <section>
-            <h2 style="margin-bottom: 1.5rem;">Pending Movie Submissions</h2>
-
-            @if ($pendingMovies->isEmpty())
-                <div class="nf-card" style="padding: 2rem; text-align: center;">
-                    <p style="color: #b3b3b3; margin: 0;">No pending submissions at the moment.</p>
-                </div>
-            @else
-                <div style="overflow-x: auto;">
-                    <table style="width: 100%; border-collapse: collapse; background: #141414; border: 1px solid #333;">
-                        <thead>
-                            <tr style="text-align: left; border-bottom: 2px solid #333;">
-                                <th style="padding: 1rem;">Movie</th>
-                                <th style="padding: 1rem;">Submitted By</th>
-                                <th style="padding: 1rem;">Year</th>
-                                <th style="padding: 1rem;">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach ($pendingMovies as $movie)
-                                <tr style="border-bottom: 1px solid #333;">
-                                    <td style="padding: 1rem;">
-                                        <div style="display: flex; align-items: center; gap: 1rem;">
-                                            <img src="https://img.youtube.com/vi/{{ $movie->youtube_id }}/default.jpg" style="height: 40px; border-radius: 4px;">
-                                            <div>
-                                                <div style="font-weight: bold;">{{ $movie->title }}</div>
-                                                <a href="https://youtube.com/watch?v={{ $movie->youtube_id }}" target="_blank" style="color: #e50914; font-size: 0.8rem;">Watch Preview</a>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td style="padding: 1rem;">{{ $movie->creator->name }}</td>
-                                    <td style="padding: 1rem;">{{ $movie->year ?? 'N/A' }}</td>
-                                    <td style="padding: 1rem;">
-                                        <div style="display: flex; gap: 0.5rem;">
-                                            <form action="{{ route('admin.movies.approve', $movie) }}" method="POST">
-                                                @csrf
-                                                @method('PATCH')
-                                                <button type="submit" class="nf-btn nf-small-btn" style="background: #10b981;">Approve</button>
-                                            </form>
-                                            <form action="{{ route('admin.movies.reject', $movie) }}" method="POST">
-                                                @csrf
-                                                @method('PATCH')
-                                                <button type="submit" class="nf-btn nf-btn-muted nf-small-btn">Reject</button>
-                                            </form>
-                                        </div>
-                                    </td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-            @endif
-        </section>
-    </main>
-</x-layouts.netflix>
+    </div>
+</x-layouts.admin>
