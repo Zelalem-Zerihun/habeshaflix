@@ -57,35 +57,12 @@
                         Explore our library
                     @endif
                 </h2>
-                <span style="color: var(--muted);">{{ $movies->count() }} results found</span>
+                <span style="color: var(--muted);">{{ $movies->total() }} results found</span>
             </div>
 
             <div class="nf-card-grid">
                 @forelse ($movies as $movie)
-                    <article class="nf-card">
-                        <img src="https://img.youtube.com/vi/{{ $movie->youtube_id }}/mqdefault.jpg" alt="{{ $movie->title }} poster">
-                        <div class="nf-card-body">
-                            <h3>{{ $movie->title }}</h3>
-                            <div class="nf-card-meta">
-                                <span>{{ $movie->year }}</span>
-                                @if($movie->genres->isNotEmpty())
-                                    <span style="margin-left: 0.5rem; color: #6d6d6d;">• {{ $movie->genres->first()->name }}</span>
-                                @endif
-                            </div>
-                            <div style="display: flex; gap: 0.5rem; align-items: center; margin-top: 0.8rem;">
-                                <a class="nf-link-btn" href="{{ route('watch', $movie) }}" style="background: #fff; color: #000; font-weight: bold; border: none;">Play</a>
-                                
-                                @auth
-                                    <form action="{{ route('watchlist.toggle', $movie) }}" method="POST">
-                                        @csrf
-                                        <button type="submit" class="nf-link-btn" style="background: rgba(109, 109, 110, 0.7); color: #fff; border: none; cursor: pointer;">
-                                            {{ auth()->user()->watchlistMovies->contains($movie->id) ? '✓ My List' : '+ My List' }}
-                                        </button>
-                                    </form>
-                                @endauth
-                            </div>
-                        </div>
-                    </article>
+                    @include('netflix.partials.card', ['movie' => $movie])
                 @empty
                     <div style="text-align: center; padding: 5rem 0; width: 100%; grid-column: 1 / -1;">
                         <h3 style="font-size: 1.2rem; color: #fff; margin-bottom: 0.5rem;">Your search for "{{ $query }}" did not have any matches.</h3>
@@ -98,10 +75,45 @@
                     </div>
                 @endforelse
             </div>
+
+            @if($movies->hasPages())
+                <div class="nf-pagination-wrapper">
+                    {{ $movies->links('pagination::bootstrap-4') }}
+                </div>
+            @endif
         </div>
     </main>
 
     <style>
+        .nf-pagination-wrapper {
+            margin-top: 4rem;
+            display: flex;
+            justify-content: center;
+        }
+        .nf-pagination-wrapper .pagination {
+            display: flex;
+            list-style: none;
+            gap: 0.5rem;
+        }
+        .nf-pagination-wrapper .page-link {
+            background: #141414;
+            color: #fff;
+            border: 1px solid #333;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+        .nf-pagination-wrapper .page-item.active .page-link {
+            background: var(--danger);
+            border-color: var(--danger);
+        }
+        .nf-pagination-wrapper .page-link:hover {
+            background: #222;
+        }
+        .nf-pagination-wrapper .page-item.disabled .page-link {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
         .nf-user-dropdown:hover .nf-dropdown-content {
             display: block !important;
         }

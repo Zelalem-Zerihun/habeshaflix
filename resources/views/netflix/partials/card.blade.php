@@ -7,7 +7,11 @@
             </a>
         </div>
     </div>
+    <div class="nf-card-info">
+        <h3 class="nf-card-title">{{ $movie->title }}</h3>
+    </div>
     <div class="nf-card-body">
+        <h3 class="nf-card-title-hover">{{ $movie->title }}</h3>
         <div class="nf-card-controls">
             <a href="{{ route('watch', $movie) }}" class="nf-circle-btn nf-circle-btn-white" title="Play">
                 <svg fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
@@ -24,15 +28,16 @@
                     </button>
                 </form>
             @endauth
-            <a href="{{ route('new-popular') }}" class="nf-circle-btn nf-circle-btn-outline" style="margin-left: auto;" title="More Info">
+            <a href="{{ route('watch', $movie) }}" class="nf-circle-btn nf-circle-btn-outline" style="margin-left: auto;" title="More Info">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
             </a>
         </div>
-        <h3>{{ $movie->title }}</h3>
         <div class="nf-card-meta">
-            <span class="nf-match">98% Match</span>
-            <span class="nf-year">{{ $movie->year }}</span>
+            @if($movie->year)
+                <span class="nf-year">{{ $movie->year }}</span>
+            @endif
             <span class="nf-badge">HD</span>
+            <span class="nf-match">{{ rand(90, 99) }}% Match</span>
         </div>
     </div>
 </article>
@@ -70,6 +75,31 @@
         width: 24px;
         height: 24px;
         margin-left: 2px;
+    }
+    .nf-card-info {
+        padding: 0.75rem 0.5rem 0.25rem;
+        transition: opacity 0.2s;
+    }
+    .nf-card:hover .nf-card-info {
+        opacity: 0;
+    }
+    .nf-card-title {
+        margin: 0;
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: #e5e5e5;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .nf-card-title-hover {
+        margin: 0 0 0.8rem;
+        font-size: 0.9rem;
+        font-weight: 700;
+        color: #fff;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
     .nf-card-controls {
         display: flex;
@@ -130,3 +160,5 @@
         border-radius: 2px;
     }
 </style>
+
+

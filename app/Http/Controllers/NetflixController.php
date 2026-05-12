@@ -62,12 +62,11 @@ class NetflixController extends Controller
         $data['genres'] = Genre::all();
         $data['years'] = Movie::whereNotNull('year')->distinct()->orderBy('year', 'desc')->pluck('year');
 
-        if ($isFiltered) {
-            $data['movies'] = $query->get();
-            $data['selectedGenre'] = $genreId;
-            $data['selectedYear'] = $year;
-            $data['selectedSort'] = $sort;
-        }
+        // Always use pagination for the movies listing
+        $data['movies'] = $query->paginate(24)->withQueryString();
+        $data['selectedGenre'] = $genreId;
+        $data['selectedYear'] = $year;
+        $data['selectedSort'] = $sort;
         
         return view('netflix.movies', $data);
     }
@@ -126,7 +125,8 @@ class NetflixController extends Controller
                 });
             })
             ->latest()
-            ->get();
+            ->paginate(24)
+            ->withQueryString();
 
         return view('netflix.search', [
             'page' => 'Search Results',
@@ -142,7 +142,7 @@ class NetflixController extends Controller
 
     private function libraryData(string $page): array
     {
-        $latestMovies = Movie::where('status', 'approved')->latest()->take(10)->get();
+        $latestMovies = Movie::where('status', 'approved')->latest()->take(12)->get();
         $heroMovie = $latestMovies->first();
 
         $rows = [
@@ -152,15 +152,42 @@ class NetflixController extends Controller
             ],
         ];
 
-        // Add dynamic rows based on genres
+        // Add "New Releases"
+        $newReleases = Movie::where('status', 'approved')->where('year', '>=', date('Y') - 1)->latest()->take(12)->get();
+        if ($newReleases->count() > 0) {
+            $rows[] = [
+                'title' => 'New Releases',
+                'items' => $newReleases,
+            ];
+        }
+
+        // Add "All Time Favorites" (random for now as we don't have ratings yet)
+        $favorites = Movie::where('status', 'approved')->inRandomOrder()->take(12)->get();
+        if ($favorites->count() > 0) {
+            $rows[] = [
+                'title' => 'Worth the Wait',
+                'items' => $favorites,
+            ];
+        }
+
+        // Add "Ethiopian Classics" (older movies)
+        $classics = Movie::where('status', 'approved')->where('year', '<', 2020)->latest()->take(12)->get();
+        if ($classics->count() > 0) {
+            $rows[] = [
+                'title' => 'Modern Classics',
+                'items' => $classics,
+            ];
+        }
+
+        // Dynamic rows based on genres only if they have enough movies
         $genres = Genre::with(['movies' => function($query) {
-            $query->where('status', 'approved')->latest()->take(10);
+            $query->where('status', 'approved')->latest()->take(12);
         }])->get();
 
         foreach ($genres as $genre) {
-            if ($genre->movies->isNotEmpty()) {
+            if ($genre->movies->count() >= 3) { // Only show genre row if it has at least 3 movies
                 $rows[] = [
-                    'title' => $genre->name . ' Spotlight',
+                    'title' => $genre->name,
                     'items' => $genre->movies,
                 ];
             }

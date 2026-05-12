@@ -134,10 +134,26 @@ class AdminController extends Controller
     }
 
     // Movie Management
-    public function movies(): View
+    public function movies(Request $request): View
     {
-        $movies = Movie::with('creator')->latest()->paginate(15);
-        return view('admin.movies.index', compact('movies'));
+        $genreId = $request->query('genre');
+        $status = $request->query('status');
+        $query = Movie::with(['creator', 'genres'])->latest();
+
+        if ($genreId) {
+            $query->whereHas('genres', function($q) use ($genreId) {
+                $q->where('genres.id', $genreId);
+            });
+        }
+
+        if ($status) {
+            $query->where('status', $status);
+        }
+
+        $movies = $query->paginate(15)->withQueryString();
+        $genres = Genre::all();
+        
+        return view('admin.movies.index', compact('movies', 'genres'));
     }
 
     public function editMovie(Movie $movie): View
@@ -229,7 +245,29 @@ class AdminController extends Controller
     // Genre Management
     public function genres(): View
     {
-        $genres = Genre::orderBy('name')->get();
+        $genres = Genre::withCount('movies')->orderBy('name')->get();
         return view('admin.genres.index', compact('genres'));
+    }
+
+    public function storeGenre(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255|unique:genres,name',
+        ]);
+
+        Genre::create($validated);
+
+        return back()->with('status', 'Genre added successfully.');
+    }
+
+    public function deleteGenre(Genre $genre): RedirectResponse
+    {
+        if ($genre->movies()->count() > 0) {
+            return back()->withErrors(['genre' => 'Cannot delete genre that is assigned to movies.']);
+        }
+
+        $genre->delete();
+
+        return back()->with('status', 'Genre deleted successfully.');
     }
 }

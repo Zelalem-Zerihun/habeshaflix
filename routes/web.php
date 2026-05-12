@@ -56,6 +56,8 @@ Route::middleware(['auth', 'admin'])->group(function () {
 
     // Genres
     Route::get('/admin/genres', [AdminController::class, 'genres'])->name('admin.genres.index');
+    Route::post('/admin/genres', [AdminController::class, 'storeGenre'])->name('admin.genres.store');
+    Route::delete('/admin/genres/{genre}', [AdminController::class, 'deleteGenre'])->name('admin.genres.destroy');
 });
 
 require __DIR__.'/auth.php';

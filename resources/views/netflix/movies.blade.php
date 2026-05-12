@@ -121,27 +121,63 @@
             </div>
         </div>
 
-        @if($isFiltered)
-            @if($movies->isEmpty())
-                <div class="nf-empty-state">
-                    <p>No movies found matching your criteria.</p>
-                    <a href="{{ route('movies') }}" class="nf-btn nf-btn-muted">Browse All Movies</a>
-                </div>
-            @else
-                <div class="nf-card-grid">
-                    @foreach($movies as $movie)
-                        @include('netflix.partials.card', ['movie' => $movie])
-                    @endforeach
-                </div>
-            @endif
+        @if($movies->isEmpty())
+            <div class="nf-empty-state">
+                <p>No movies found matching your criteria.</p>
+                <a href="{{ route('movies') }}" class="nf-btn nf-btn-muted">Browse All Movies</a>
+            </div>
         @else
-            @foreach ($rows as $row)
-                @include('netflix.partials.row', ['title' => $row['title'], 'items' => $row['items']])
-            @endforeach
+            <div class="nf-card-grid">
+                @foreach($movies as $movie)
+                    @include('netflix.partials.card', ['movie' => $movie])
+                @endforeach
+            </div>
+
+            <div class="nf-pagination-wrapper">
+                {{ $movies->links('pagination::bootstrap-4') }}
+            </div>
+        @endif
+
+        @if(!$isFiltered && isset($rows) && count($rows) > 0)
+            <div style="margin-top: 4rem;">
+                @foreach (array_slice($rows, 1) as $row)
+                    @include('netflix.partials.row', ['title' => $row['title'], 'items' => $row['items']])
+                @endforeach
+            </div>
         @endif
     </main>
 
     <style>
+        .nf-pagination-wrapper {
+            margin-top: 4rem;
+            display: flex;
+            justify-content: center;
+        }
+        .nf-pagination-wrapper .pagination {
+            display: flex;
+            list-style: none;
+            gap: 0.5rem;
+        }
+        .nf-pagination-wrapper .page-link {
+            background: #141414;
+            color: #fff;
+            border: 1px solid #333;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+        .nf-pagination-wrapper .page-item.active .page-link {
+            background: var(--danger);
+            border-color: var(--danger);
+        }
+        .nf-pagination-wrapper .page-link:hover {
+            background: #222;
+        }
+        .nf-pagination-wrapper .page-item.disabled .page-link {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
         .nf-filter-bar {
             display: flex;
             align-items: center;

@@ -24,11 +24,34 @@
             </div>
         </div>
 
+        <div class="card-filters" style="padding: 1rem 1.5rem; background: #f8fafc; border-bottom: 1px solid var(--border-color); display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+            <form action="{{ route('admin.movies.index') }}" method="GET" style="display: flex; gap: 0.75rem; flex-grow: 1; align-items: center;">
+                <select name="genre" onchange="this.form.submit()" class="form-input" style="width: auto; height: 38px; padding-top: 0; padding-bottom: 0;">
+                    <option value="">All Genres</option>
+                    @foreach($genres as $genre)
+                        <option value="{{ $genre->id }}" {{ request('genre') == $genre->id ? 'selected' : '' }}>{{ $genre->name }}</option>
+                    @endforeach
+                </select>
+
+                <select name="status" onchange="this.form.submit()" class="form-input" style="width: auto; height: 38px; padding-top: 0; padding-bottom: 0;">
+                    <option value="">All Status</option>
+                    <option value="approved" {{ request('status') == 'approved' ? 'selected' : '' }}>Approved</option>
+                    <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
+                    <option value="rejected" {{ request('status') == 'rejected' ? 'selected' : '' }}>Rejected</option>
+                </select>
+
+                @if(request('genre') || request('status'))
+                    <a href="{{ route('admin.movies.index') }}" style="font-size: 0.875rem; color: var(--danger); text-decoration: underline;">Clear Filters</a>
+                @endif
+            </form>
+        </div>
+
         <div style="overflow-x: auto;">
             <table class="admin-table">
                 <thead>
                     <tr>
                         <th>Movie</th>
+                        <th>Genres</th>
                         <th>Submitted By</th>
                         <th>Status</th>
                         <th>Date Added</th>
@@ -47,6 +70,15 @@
                                         <div style="font-weight: 600;">{{ $movie->title }}</div>
                                         <div style="font-size: 0.75rem; color: var(--text-muted);">{{ $movie->year ?? 'N/A' }}</div>
                                     </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div style="display: flex; flex-wrap: wrap; gap: 0.25rem;">
+                                    @forelse($movie->genres as $genre)
+                                        <span style="font-size: 0.7rem; background: #e2e8f0; color: #475569; padding: 0.1rem 0.4rem; border-radius: 9999px;">{{ $genre->name }}</span>
+                                    @empty
+                                        <span style="font-size: 0.75rem; color: var(--text-muted);">No Genre</span>
+                                    @endforelse
                                 </div>
                             </td>
                             <td>

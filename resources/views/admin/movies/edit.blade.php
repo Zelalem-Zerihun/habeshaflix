@@ -55,16 +55,21 @@
                     </select>
                 </div>
 
+                @php
+                    $selectedGenres = array_map('strval', old('genres', $movie->genres->pluck('id')->toArray()));
+                    $selectedCasts = array_map('strval', old('casts', $movie->castMembers->pluck('id')->toArray()));
+                @endphp
+
                 <div x-data="{ 
-                    selectedGenres: {{ json_encode(array_map('strval', old('genres', $movie->genres->pluck('id')->toArray()))) }},
-                    selectedCasts: {{ json_encode(array_map('strval', old('casts', $movie->castMembers->pluck('id')->toArray()))) }}
+                    selectedGenres: @js($selectedGenres),
+                    selectedCasts: @js($selectedCasts)
                 }">
                     <div style="margin-bottom: 2rem; border-top: 1px solid var(--border-color); padding-top: 2rem;">
                         <label style="display: block; margin-bottom: 1.25rem; font-weight: 700; font-size: 1rem;">Genres</label>
                         <div style="display: flex; flex-wrap: wrap; gap: 0.75rem;">
                             @foreach($genres as $genre)
                                 <label style="cursor: pointer; display: flex; align-items: center; gap: 0.5rem; background: #fff; padding: 0.4rem 1rem; border-radius: 9999px; border: 2px solid var(--border-color); transition: all 0.2s;" :style="selectedGenres.includes('{{ $genre->id }}') ? 'border-color: var(--primary); background: #eff6ff' : ''">
-                                    <input type="checkbox" name="genres[]" value="{{ $genre->id }}" x-model="selectedGenres" style="width: 1rem; height: 1rem; accent-color: var(--primary);">
+                                    <input type="checkbox" name="genres[]" value="{{ $genre->id }}" x-model="selectedGenres" {{ in_array($genre->id, $selectedGenres) ? 'checked' : '' }} style="width: 1rem; height: 1rem; accent-color: var(--primary);">
                                     <span style="font-size: 0.875rem; font-weight: 500;">{{ $genre->name }}</span>
                                 </label>
                             @endforeach
@@ -81,7 +86,7 @@
                                         style="text-align: center; padding: 0.75rem; border-radius: 0.75rem; transition: all 0.2s; border: 2px solid transparent;"
                                     >
                                         <div style="position: absolute; top: 5px; right: 5px; z-index: 2;">
-                                            <input type="checkbox" name="casts[]" value="{{ $cast->id }}" x-model="selectedCasts" style="width: 1rem; height: 1rem; accent-color: var(--primary);">
+                                            <input type="checkbox" name="casts[]" value="{{ $cast->id }}" x-model="selectedCasts" {{ in_array($cast->id, $selectedCasts) ? 'checked' : '' }} style="width: 1rem; height: 1rem; accent-color: var(--primary);">
                                         </div>
 
                                         <div style="width: 60px; height: 60px; border-radius: 50%; overflow: hidden; margin: 0 auto 0.5rem; border: 2px solid #fff;">
